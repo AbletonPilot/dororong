@@ -20,7 +20,7 @@ jobs:
       - name: Create local tap
         run: |
           mkdir -p $(brew --repository)/Library/Taps/abletonpilot/homebrew-tap
-          cp homebrew-core-formula.rb $(brew --repository)/Library/Taps/abletonpilot/homebrew-tap/dororong.rb
+          cp ./homebrew-core-formula.rb $(brew --repository)/Library/Taps/abletonpilot/homebrew-tap/dororong.rb
 
       - name: Test formula syntax
         run: brew audit --new-formula abletonpilot/tap/dororong
