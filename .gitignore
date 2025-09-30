@@ -26,4 +26,4 @@ Thumbs.db
 *.bak
 
 scripts/
-homebrew-core-formula.rb
+dororong.rb
