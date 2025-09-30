@@ -77,6 +77,15 @@ jobs:
             BINARY_NAME="dororong"
           fi
 
+          echo "BINARY_NAME is set to: $BINARY_NAME"
+          echo "Checking if file exists with test -f:"
+          test -f "$BINARY_NAME" && echo "File exists" || echo "File does not exist"
+          
+          # Try to copy with full path
+          echo "Attempting to copy with full path:"
+          cp "./dororong" "dororong_copy" 2>&1 || echo "Direct copy failed"
+          ls -la dororong* || echo "No dororong files after copy attempt"
+
           # Verify binary exists
           if [ ! -f "$BINARY_NAME" ]; then
             echo "Error: Binary $BINARY_NAME not found!"
