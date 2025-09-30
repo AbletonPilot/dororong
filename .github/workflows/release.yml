@@ -65,17 +65,25 @@ jobs:
         run: |
           cd target/${{ matrix.target }}/release
 
+          # Determine binary name based on OS
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            BINARY_NAME="dororong.exe"
+          else
+            BINARY_NAME="dororong"
+          fi
+
+          # Verify binary exists
+          if [ ! -f "$BINARY_NAME" ]; then
+            echo "Error: Binary $BINARY_NAME not found!"
+            ls -la
+            exit 1
+          fi
+
           # Create archive directory
           mkdir -p archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
 
-          # Copy binary
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            cp dororong.exe archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/dororong.exe
-            binary_name="dororong.exe"
-          else
-            cp dororong archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/dororong
-            binary_name="dororong"
-          fi
+          # Copy binary to archive
+          cp "$BINARY_NAME" archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
 
           # Copy additional files
           cp ../../../README.md archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
@@ -90,13 +98,10 @@ jobs:
             echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
           fi
 
-          # Copy standalone binary for Homebrew (from original location)
+          # Copy standalone binary for Homebrew (using correct filename)
           cd ../..
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            cp dororong.exe ${{ matrix.name }}
-          else
-            cp dororong ${{ matrix.name }}
-          fi
+          cp "$BINARY_NAME" "${{ matrix.name }}"
+          echo "STANDALONE_BINARY=${{ matrix.name }}" >> $GITHUB_ENV
 
       - name: Upload archive
         uses: actions/upload-artifact@v4
@@ -108,7 +113,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/${{ matrix.name }}
+          path: target/${{ matrix.target }}/release/${{ env.STANDALONE_BINARY }}
 
   release:
     needs: build
@@ -126,27 +131,32 @@ jobs:
         run: |
           # Move archives to root
           find . -name "*.tar.gz" -o -name "*.zip" | while read file; do
-            cp "$file" .
-          done
-
-          # Move binaries to root for Homebrew
-          find . -name "dororong*" -type f | grep -E "(binary-|dororong-macos-|dororong-linux-|dororong-windows-)" | while read file; do
-            if [[ "$file" != *".tar.gz" && "$file" != *".zip" ]]; then
+            if [ -f "$file" ]; then
               cp "$file" .
             fi
           done
 
+          # Move binaries to root for Homebrew
+          find binary-* -type f | while read file; do
+            basename_file=$(basename "$file")
+            cp "$file" "$basename_file"
+          done
+
       - name: List release assets
         run: |
+          echo "All files in current directory:"
+          ls -la
+          echo ""
           echo "Archives:"
-          ls -la *.tar.gz *.zip 2>/dev/null || true
+          ls -la *.tar.gz *.zip 2>/dev/null || echo "No archives found"
+          echo ""
           echo "Binaries:"
-          ls -la dororong-* 2>/dev/null || true
+          ls -la dororong-* 2>/dev/null || echo "No binaries found"
 
       - name: Calculate checksums
         run: |
           # Calculate SHA256 for all assets
-          for file in *.tar.gz *.zip dororong-macos-* dororong-linux-* dororong-windows-*; do
+          for file in *.tar.gz *.zip dororong-*; do
             if [ -f "$file" ]; then
               sha256sum "$file" >> SHA256SUMS
             fi
@@ -166,9 +176,7 @@ jobs:
           files: |
             *.tar.gz
             *.zip
-            dororong-macos-*
-            dororong-linux-*
-            dororong-windows-*
+            dororong-*
             SHA256SUMS
           generate_release_notes: true
           body: |

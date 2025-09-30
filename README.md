@@ -1,66 +1,166 @@
-# Dororong
+# 🐧 Dororong
 
 Dororong will be dancing for you! A fun terminal animation app.
-도로롱이 당신을 위해 춤을 춰줄 거예요! 재미있는 터미널 애니메이션 앱입니다.
 
-## 🚀 Quick Installation
+## Quick Installation
 
-### 🍺 Homebrew (macOS)
+### Homebrew (macOS)
 ```bash
-brew tap AbletonPilot/tap
 brew install dororong
 ```
 
-### 🐧 Linux (One-liner)
+### Linux (One-liner)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/install.sh | bash
 ```
 
-### 🪟 Windows (Chocolatey)
+### Windows (Chocolatey)
 ```powershell
 choco install dororong
 ```
 
-## 📦 All Installation Methods
+## Installation Methods
 
-For detailed installation instructions including manual installation, snap packages, and troubleshooting, see [INSTALLATION.md](INSTALLATION.md).
+### macOS
 
-## Installation
-
-### Download Binaries
-
-Download the latest release from [GitHub Releases](https://github.com/AbletonPilot/dororong/releases).
-
-Available for:
-- Linux (x86_64, aarch64)
-- Windows (x86_64)
-- macOS (x86_64 and Apple Silicon)
-
-### Homebrew (macOS)
-
-Add the tap and install:
-
+#### Homebrew (Recommended)
 ```bash
 brew install dororong
+
+# Update
+brew upgrade dororong
+```
+
+#### Manual Installation
+Download from [Releases page](https://github.com/AbletonPilot/dororong/releases):
+- `dororong-macos-x86_64` (Intel Mac)
+- `dororong-macos-aarch64` (Apple Silicon)
+
+### Linux
+
+#### One-liner Install Script (Recommended)
+```bash
+# Install
+curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/install.sh | bash
+
+# Or using wget
+wget -qO- https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/install.sh | bash
+
+# Uninstall
+curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/uninstall.sh | bash
+```
+
+#### Snap Package
+```bash
+sudo snap install dororong
+sudo snap remove dororong  # Uninstall
+```
+
+#### Manual Installation
+```bash
+# Intel/AMD 64-bit
+wget https://github.com/AbletonPilot/dororong/releases/latest/download/dororong-linux-x86_64.tar.gz
+tar -xzf dororong-linux-x86_64.tar.gz
+sudo mv dororong-*/dororong /usr/local/bin/
+
+# ARM 64-bit
+wget https://github.com/AbletonPilot/dororong/releases/latest/download/dororong-linux-aarch64.tar.gz
+tar -xzf dororong-linux-aarch64.tar.gz
+sudo mv dororong-*/dororong /usr/local/bin/
+```
+
+### Windows
+
+#### Chocolatey (Recommended)
+```powershell
+choco install dororong
+choco upgrade dororong  # Update
+choco uninstall dororong  # Uninstall
+```
+
+#### Manual Installation
+1. Download `dororong-windows-x86_64.zip` from [Releases page](https://github.com/AbletonPilot/dororong/releases)
+2. Extract the archive
+3. Add `dororong.exe` to PATH:
+
+```powershell
+$path = [Environment]::GetEnvironmentVariable("PATH", "User")
+[Environment]::SetEnvironmentVariable("PATH", "$path;C:\path\to\dororong", "User")
 ```
 
 ## Usage
 
-### Static display with text
+### Basic Commands
 ```bash
+# Show help
+dororong --help
+
+# Check version
+dororong --version
+
+# Static display with text
 dororong say "Hello World"
 ```
 
 ### Animations
 ```bash
-dororong bokbok
-dororong pangpang
-dororong run
-dororong dance
-dororong frontback
-dororong updown
+dororong bokbok      # Bokbok animation
+dororong pangpang    # Pangpang animation
+dororong run         # Running animation
+dororong dance       # Dance animation
+dororong frontback   # Front-back animation
+dororong updown      # Up-down animation
 ```
 
-Add `--fast` or `-f` for faster animation.
+### Options
+- `--fast` or `-f`: Fast animation
+- Exit: `q`, `Esc`, or `Ctrl+C`
 
-Press `q`, `Esc`, or `Ctrl+C` to exit animations.
+## Building from Source
+
+```bash
+# Clone repository
+git clone https://github.com/AbletonPilot/dororong.git
+cd dororong
+
+# Install Rust (if needed)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Build
+cargo build --release
+
+# Run
+./target/release/dororong
+```
+
+## System Requirements
+
+- **Linux**: glibc 2.31+ (Ubuntu 20.04+, Debian 11+, CentOS 8+)
+- **macOS**: 10.15+ (Catalina)
+- **Windows**: Windows 10+
+
+## Troubleshooting
+
+### Permission Error (Linux/macOS)
+```bash
+chmod +x /path/to/dororong
+```
+
+### PATH Issues
+```bash
+# Add to PATH for current session
+export PATH="/path/to/dororong:$PATH"
+
+# Add to PATH permanently (bash)
+echo 'export PATH="/path/to/dororong:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Windows Defender Warning
+Some antivirus software may report false positives. This is common with Rust-compiled binaries. Mark as safe or add to exceptions.
+
+## Support & Contributing
+
+- **Bug Reports**: [GitHub Issues](https://github.com/AbletonPilot/dororong/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/AbletonPilot/dororong/discussions)
+- **Contributing**: Pull requests are always welcome!
