@@ -3,27 +3,21 @@ $ErrorActionPreference = 'Stop'
 $packageName = 'dororong'
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $version = '0.1.0'
-$url64 = "https://github.com/AbletonPilot/dororong/releases/download/v$version/dororong-v$version-x86_64-pc-windows-msvc.tar.gz"
+$url64 = "https://github.com/AbletonPilot/dororong/releases/download/v$version/dororong-v$version-x86_64-pc-windows-msvc.zip"
 
 $packageArgs = @{
   packageName   = $packageName
-  fileFullPath  = Join-Path $toolsDir "dororong.tar.gz"
+  unzipLocation = $toolsDir
   url64bit      = $url64
-  checksum64    = 'b41c98aa23a2da8f2a67ea209d6bf9aebc450acde4b140d4a2050ba823c171ca'
+  softwareName  = 'dororong*'
+  checksum64    = 'CHECKSUM64_PLACEHOLDER'
   checksumType64= 'sha256'
 }
 
-Get-ChocolateyWebFile @packageArgs
-
-# Extract tar.gz
-$extractDir = Join-Path $toolsDir "dororong-v$version-x86_64-pc-windows-msvc"
-tar -xzf $packageArgs.fileFullPath -C $toolsDir
-if (!(Test-Path $extractDir)) {
-  Write-Error "Extraction failed: $extractDir not found"
-}
+Install-ChocolateyZipPackage @packageArgs
 
 # Create shim for the executable
-$exePath = Join-Path $extractDir "dororong.exe"
+$exePath = Join-Path $toolsDir "dororong-v$version-x86_64-pc-windows-msvc\dororong.exe"
 if (Test-Path $exePath) {
   Install-ChocolateyShim -Name 'dororong' -Path $exePath
 } else {

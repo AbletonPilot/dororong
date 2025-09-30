@@ -25,8 +25,8 @@ SOURCE_URL="https://github.com/AbletonPilot/dororong/archive/$TAG.tar.gz"
 SOURCE_FILE="$TEMP_DIR/$TAG.tar.gz"
 
 # Windows binary (for Chocolatey)
-WINDOWS_URL="https://github.com/AbletonPilot/dororong/releases/download/$TAG/dororong-$TAG-x86_64-pc-windows-msvc.tar.gz"
-WINDOWS_FILE="$TEMP_DIR/dororong-$TAG-x86_64-pc-windows-msvc.tar.gz"
+WINDOWS_URL="https://github.com/AbletonPilot/dororong/releases/download/$TAG/dororong-$TAG-x86_64-pc-windows-msvc.zip"
+WINDOWS_FILE="$TEMP_DIR/dororong-$TAG-x86_64-pc-windows-msvc.zip"
 
 echo "Downloading source archive: $SOURCE_URL"
 curl -L -o "$SOURCE_FILE" "$SOURCE_URL"

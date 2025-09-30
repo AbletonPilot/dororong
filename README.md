@@ -50,12 +50,6 @@ wget -qO- https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/i
 curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/uninstall.sh | bash
 ```
 
-#### Snap Package
-```bash
-sudo snap install dororong
-sudo snap remove dororong  # Uninstall
-```
-
 #### Manual Installation
 ```bash
 # Download and extract the archive for your platform
