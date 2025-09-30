@@ -92,7 +92,11 @@ jobs:
 
           # Copy standalone binary for Homebrew (from original location)
           cd ../..
-          cp $binary_name ${{ matrix.name }}
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            cp dororong.exe ${{ matrix.name }}
+          else
+            cp dororong ${{ matrix.name }}
+          fi
 
       - name: Upload archive
         uses: actions/upload-artifact@v4
