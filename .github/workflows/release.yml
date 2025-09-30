@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
@@ -13,15 +16,23 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             name: dororong-linux-x86_64
+            archive: tar.gz
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            name: dororong-linux-aarch64
+            archive: tar.gz
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             name: dororong-windows-x86_64.exe
+            archive: zip
           - os: macos-latest
             target: x86_64-apple-darwin
             name: dororong-macos-x86_64
+            archive: tar.gz
           - os: macos-latest
             target: aarch64-apple-darwin
             name: dororong-macos-aarch64
+            archive: tar.gz
 
     runs-on: ${{ matrix.os }}
 
@@ -29,10 +40,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install cross-compilation tools (Linux ARM64)
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+
+      - name: Configure cross-compilation (Linux ARM64)
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          echo "[target.aarch64-unknown-linux-gnu]" >> ~/.cargo/config.toml
+          echo "linker = \"aarch64-linux-gnu-gcc\"" >> ~/.cargo/config.toml
 
       - name: Build release
         run: cargo build --release --target ${{ matrix.target }}
@@ -41,16 +64,46 @@ jobs:
         shell: bash
         run: |
           cd target/${{ matrix.target }}/release
+
+          # Create archive directory
+          mkdir -p archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
+
+          # Copy binary
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            cp dororong.exe ${{ matrix.name }}
+            cp dororong.exe archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/dororong.exe
+            binary_name="dororong.exe"
           else
-            cp dororong ${{ matrix.name }}
+            cp dororong archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/dororong
+            binary_name="dororong"
           fi
+
+          # Copy additional files
+          cp ../../../README.md archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
+
+          # Create archive
+          cd archive
+          if [ "${{ matrix.archive }}" == "zip" ]; then
+            zip -r ../dororong-${{ github.ref_name }}-${{ matrix.target }}.zip dororong-${{ github.ref_name }}-${{ matrix.target }}/
+            echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.zip" >> $GITHUB_ENV
+          else
+            tar -czf ../dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz dororong-${{ github.ref_name }}-${{ matrix.target }}/
+            echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
+          fi
+
+          # Also copy standalone binary for Homebrew
+          cd ..
+          cp dororong-${{ github.ref_name }}-${{ matrix.target }}/$binary_name ${{ matrix.name }}
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: archive-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/${{ env.ASSET_NAME }}
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.name }}
+          name: binary-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ matrix.name }}
 
   release:
@@ -59,21 +112,121 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
-      - name: Prepare binaries
+      - name: Prepare release assets
         run: |
-          find . -name "dororong*" -type f -exec cp {} . \;
+          # Move archives to root
+          find . -name "*.tar.gz" -o -name "*.zip" | while read file; do
+            cp "$file" .
+          done
 
-      - name: List files
-        run: ls -la dororong*
+          # Move binaries to root for Homebrew
+          find . -name "dororong*" -type f | grep -E "(binary-|dororong-macos-|dororong-linux-|dororong-windows-)" | while read file; do
+            if [[ "$file" != *".tar.gz" && "$file" != *".zip" ]]; then
+              cp "$file" .
+            fi
+          done
+
+      - name: List release assets
+        run: |
+          echo "Archives:"
+          ls -la *.tar.gz *.zip 2>/dev/null || true
+          echo "Binaries:"
+          ls -la dororong-* 2>/dev/null || true
+
+      - name: Calculate checksums
+        run: |
+          # Calculate SHA256 for all assets
+          for file in *.tar.gz *.zip dororong-macos-* dororong-linux-* dororong-windows-*; do
+            if [ -f "$file" ]; then
+              sha256sum "$file" >> SHA256SUMS
+            fi
+          done
+
+          # Save specific hashes for Homebrew formula update
+          if [ -f "dororong-macos-x86_64" ]; then
+            echo "MACOS_X86_64_SHA=$(sha256sum dororong-macos-x86_64 | cut -d' ' -f1)" >> $GITHUB_ENV
+          fi
+          if [ -f "dororong-macos-aarch64" ]; then
+            echo "MACOS_AARCH64_SHA=$(sha256sum dororong-macos-aarch64 | cut -d' ' -f1)" >> $GITHUB_ENV
+          fi
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dororong*
+            *.tar.gz
+            *.zip
+            dororong-macos-*
+            dororong-linux-*
+            dororong-windows-*
+            SHA256SUMS
           generate_release_notes: true
+          body: |
+            ## 설치 방법
+
+            ### Homebrew (macOS)
+            ```bash
+            brew tap AbletonPilot/tap
+            brew install dororong
+            ```
+
+            ### 직접 다운로드
+            1. 아래에서 당신의 플랫폼에 맞는 파일을 다운로드하세요
+            2. 압축을 풀고 실행 파일을 PATH에 추가하세요
+
+            ### 지원 플랫폼
+            - **Linux**: x86_64, aarch64
+            - **macOS**: x86_64 (Intel), aarch64 (Apple Silicon)
+            - **Windows**: x86_64
+
+            SHA256 체크섬은 `SHA256SUMS` 파일에서 확인할 수 있습니다.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-homebrew:
+    needs: release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download release assets
+        run: |
+          # Download the binaries for SHA calculation
+          tag_name=${GITHUB_REF#refs/tags/}
+          wget -O dororong-macos-x86_64 "https://github.com/${{ github.repository }}/releases/download/${tag_name}/dororong-macos-x86_64"
+          wget -O dororong-macos-aarch64 "https://github.com/${{ github.repository }}/releases/download/${tag_name}/dororong-macos-aarch64"
+
+      - name: Calculate SHA256 and update Homebrew formula
+        run: |
+          tag_name=${GITHUB_REF#refs/tags/}
+          version=${tag_name#v}
+
+          x86_64_sha=$(sha256sum dororong-macos-x86_64 | cut -d' ' -f1)
+          aarch64_sha=$(sha256sum dororong-macos-aarch64 | cut -d' ' -f1)
+
+          # Update Formula
+          sed -i "s/version \".*\"/version \"$version\"/" Formula/dororong.rb
+          sed -i "s/SHA256_FOR_X86_64/$x86_64_sha/" Formula/dororong.rb
+          sed -i "s/SHA256_FOR_AARCH64/$aarch64_sha/" Formula/dororong.rb
+
+      - name: Commit and push updated formula
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          if git diff --quiet Formula/dororong.rb; then
+            echo "No changes to commit"
+          else
+            git add Formula/dororong.rb
+            git commit -m "Update Homebrew formula for ${GITHUB_REF#refs/tags/}"
+            git push
+          fi

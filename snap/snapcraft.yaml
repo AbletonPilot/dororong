@@ -1,0 +1,39 @@
+name: dororong
+version: '0.1.2'
+summary: Dororong will be dancing for you! 도로롱이 당신을 위해 춤을 춰줄 거예요!e: dororong
+version: "0.1.0"
+summary: Dororong will be dancing for you! 도로롱이 당신을 위해 춤을 춰줄 거예요!
+description: |
+  Dororong is a fun command-line tool that displays animated dancing characters 
+  in your terminal. 도로롱은 터미널에서 춤추는 캐릭터 애니메이션을 보여주는 
+  재미있는 명령줄 도구입니다.
+
+  Features:
+  - Various dance animations (bokbok, dance, frontback, pangpang, run, updown)
+  - Static display option
+  - Cross-platform support
+  - Lightweight and fast
+
+grade: stable
+confinement: strict
+base: core22
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  dororong:
+    command: bin/dororong
+    plugs:
+      - home
+      - removable-media
+
+parts:
+  dororong:
+    plugin: rust
+    source: ..
+    rust-features: []
+    build-packages:
+      - build-essential
+    stage-packages: []
