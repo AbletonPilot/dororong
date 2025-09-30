@@ -1,0 +1,40 @@
+name: Test Homebrew Formula
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test-formula:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Create local tap
+        run: |
+          mkdir -p $(brew --repository)/Library/Taps/abletonpilot/homebrew-tap
+          cp homebrew-core-formula.rb $(brew --repository)/Library/Taps/abletonpilot/homebrew-tap/dororong.rb
+
+      - name: Test formula syntax
+        run: brew audit --new-formula abletonpilot/tap/dororong
+
+      - name: Install formula
+        run: brew install abletonpilot/tap/dororong
+
+      - name: Test installed binary
+        run: |
+          dororong --help
+          dororong --version
+
+      - name: Test formula test block
+        run: brew test abletonpilot/tap/dororong
+
+      - name: Uninstall formula
+        run: brew uninstall abletonpilot/tap/dororong
