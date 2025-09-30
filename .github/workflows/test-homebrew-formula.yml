@@ -29,7 +29,7 @@ jobs:
           cp ./homebrew-core-formula.rb $(brew --repository)/Library/Taps/abletonpilot/homebrew-tap/dororong.rb
 
       - name: Test formula syntax
-        run: brew audit --new-formula abletonpilot/tap/dororong
+        run: brew audit --new abletonpilot/tap/dororong
 
       - name: Install formula
         run: brew install abletonpilot/tap/dororong
