@@ -2,7 +2,7 @@ class Dororong < Formula
   desc "Fun terminal animation app with dancing characters"
   homepage "https://github.com/AbletonPilot/dororong"
   url "https://github.com/AbletonPilot/dororong/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "6e722d248763227b968c944c2bd69faaf9773ccd1e8752857620c932c30a613b"
+  sha256 "4fca3377d862165fdef8d700f0582528cb92f4619ad9ff2b45cf39add61b0a94"
   license "MIT"
   head "https://github.com/AbletonPilot/dororong.git", branch: "main"
 
