@@ -17,6 +17,12 @@ jobs:
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
+      - name: Debug file structure
+        run: |
+          pwd
+          ls -la
+          find . -name "*.rb" -type f
+
       - name: Create local tap
         run: |
           mkdir -p $(brew --repository)/Library/Taps/abletonpilot/homebrew-tap
