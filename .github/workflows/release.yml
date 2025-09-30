@@ -65,11 +65,6 @@ jobs:
         run: |
           cd target/${{ matrix.target }}/release
 
-          # Debug: List all files in current directory
-          echo "=== Files in target/${{ matrix.target }}/release ==="
-          ls -la
-          echo "=== End of file listing ==="
-
           # Determine binary name based on OS
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             BINARY_NAME="dororong.exe"
@@ -77,24 +72,16 @@ jobs:
             BINARY_NAME="dororong"
           fi
 
-          echo "BINARY_NAME is set to: $BINARY_NAME"
-          echo "Checking if file exists with test -f:"
-          test -f "$BINARY_NAME" && echo "File exists" || echo "File does not exist"
-          
-          # Try to copy with full path
-          echo "Attempting to copy with full path:"
-          cp "./dororong" "dororong_copy" 2>&1 || echo "Direct copy failed"
-          ls -la dororong* || echo "No dororong files after copy attempt"
-
-          # Verify binary exists
+          # Verify binary exists and create a working copy
           if [ ! -f "$BINARY_NAME" ]; then
             echo "Error: Binary $BINARY_NAME not found!"
-            echo "Looking for any dororong* files:"
-            find . -name "dororong*" -type f
-            echo "Looking in parent directories:"
-            find ../.. -name "dororong*" -type f 2>/dev/null || echo "No dororong files found in parent dirs"
+            ls -la
             exit 1
           fi
+
+          # Create a working copy to avoid hardlink issues
+          cp "$BINARY_NAME" "${BINARY_NAME}_working_copy"
+          BINARY_NAME="${BINARY_NAME}_working_copy"
 
           # Create archive directory
           mkdir -p archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
