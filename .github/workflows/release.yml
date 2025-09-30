@@ -64,10 +64,10 @@ jobs:
         shell: bash
         run: |
           cd target/${{ matrix.target }}/release
-
+          
           # Create archive directory
           mkdir -p archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-
+          
           # Copy binary
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             cp dororong.exe archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/dororong.exe
@@ -76,10 +76,10 @@ jobs:
             cp dororong archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/dororong
             binary_name="dororong"
           fi
-
+          
           # Copy additional files
           cp ../../../README.md archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-
+          
           # Create archive
           cd archive
           if [ "${{ matrix.archive }}" == "zip" ]; then
@@ -89,12 +89,10 @@ jobs:
             tar -czf ../dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz dororong-${{ github.ref_name }}-${{ matrix.target }}/
             echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
           fi
-
-          # Also copy standalone binary for Homebrew
-          cd ..
-          cp dororong-${{ github.ref_name }}-${{ matrix.target }}/$binary_name ${{ matrix.name }}
-
-      - name: Upload archive
+          
+          # Copy standalone binary for Homebrew (from original location)
+          cd ../..
+          cp $binary_name ${{ matrix.name }}      - name: Upload archive
         uses: actions/upload-artifact@v4
         with:
           name: archive-${{ matrix.target }}
