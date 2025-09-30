@@ -13,13 +13,10 @@ pub struct Cli {
 pub enum Commands {
     /// Static display with text
     #[command(name = "say")]
-    Say {
-        text: String,
-    },
+    Say { text: String },
     /// Bokbok animation
     #[command(name = "bokbok")]
     Bokbok {
-        text: Option<String>,
         /// Fast version of animation
         #[arg(short, long)]
         fast: bool,
@@ -27,7 +24,6 @@ pub enum Commands {
     /// Pangpang animation  
     #[command(name = "pangpang")]
     Pangpang {
-        text: Option<String>,
         /// Fast version of animation
         #[arg(short, long)]
         fast: bool,
@@ -35,7 +31,6 @@ pub enum Commands {
     /// Run animation
     #[command(name = "run")]
     Run {
-        text: Option<String>,
         /// Fast version of animation
         #[arg(short, long)]
         fast: bool,
@@ -43,7 +38,6 @@ pub enum Commands {
     /// Dance animation
     #[command(name = "dance")]
     Dance {
-        text: Option<String>,
         /// Fast version of animation
         #[arg(short, long)]
         fast: bool,
@@ -51,7 +45,6 @@ pub enum Commands {
     /// Frontback animation
     #[command(name = "frontback")]
     Frontback {
-        text: Option<String>,
         /// Fast version of animation
         #[arg(short, long)]
         fast: bool,
@@ -59,7 +52,6 @@ pub enum Commands {
     /// Updown animation
     #[command(name = "updown")]
     Updown {
-        text: Option<String>,
         /// Fast version of animation
         #[arg(short, long)]
         fast: bool,

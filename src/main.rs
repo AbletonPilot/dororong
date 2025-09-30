@@ -23,38 +23,23 @@ async fn main() {
         Commands::Say { text } => {
             display_say_command(&STATIC_FRAME, &text);
         }
-        Commands::Bokbok { text, fast } => {
-            run_animation_with_speed(&BOKBOK_FRAMES, &BOKBOK_FRAMES_FAST, fast, text.as_deref())
-                .await;
+        Commands::Bokbok { fast } => {
+            run_animation_with_speed(&BOKBOK_FRAMES, &BOKBOK_FRAMES_FAST, fast).await;
         }
-        Commands::Pangpang { text, fast } => {
-            run_animation_with_speed(
-                &PANGPANG_FRAMES,
-                &PANGPANG_FRAMES_FAST,
-                fast,
-                text.as_deref(),
-            )
-            .await;
+        Commands::Pangpang { fast } => {
+            run_animation_with_speed(&PANGPANG_FRAMES, &PANGPANG_FRAMES_FAST, fast).await;
         }
-        Commands::Run { text, fast } => {
-            run_animation_with_speed(&RUN_FRAMES, &RUN_FRAMES_FAST, fast, text.as_deref()).await;
+        Commands::Run { fast } => {
+            run_animation_with_speed(&RUN_FRAMES, &RUN_FRAMES_FAST, fast).await;
         }
-        Commands::Dance { text, fast } => {
-            run_animation_with_speed(&DANCE_FRAMES, &DANCE_FRAMES_FAST, fast, text.as_deref())
-                .await;
+        Commands::Dance { fast } => {
+            run_animation_with_speed(&DANCE_FRAMES, &DANCE_FRAMES_FAST, fast).await;
         }
-        Commands::Frontback { text, fast } => {
-            run_animation_with_speed(
-                &FRONTBACK_FRAMES,
-                &FRONTBACK_FRAMES_FAST,
-                fast,
-                text.as_deref(),
-            )
-            .await;
+        Commands::Frontback { fast } => {
+            run_animation_with_speed(&FRONTBACK_FRAMES, &FRONTBACK_FRAMES_FAST, fast).await;
         }
-        Commands::Updown { text, fast } => {
-            run_animation_with_speed(&UPDOWN_FRAMES, &UPDOWN_FRAMES_FAST, fast, text.as_deref())
-                .await;
+        Commands::Updown { fast } => {
+            run_animation_with_speed(&UPDOWN_FRAMES, &UPDOWN_FRAMES_FAST, fast).await;
         }
     }
 }
@@ -63,13 +48,12 @@ async fn run_animation_with_speed(
     normal_frames: &crate::frames::AnimatedFrames,
     fast_frames: &crate::frames::AnimatedFrames,
     fast: bool,
-    text: Option<&str>,
 ) {
     let frames = if fast { fast_frames } else { normal_frames };
-    run_animation(frames, text).await;
+    run_animation(frames).await;
 }
 
-async fn run_animation(frames: &crate::frames::AnimatedFrames, text: Option<&str>) {
+async fn run_animation(frames: &crate::frames::AnimatedFrames) {
     match check_terminal_size() {
         Ok(true) => {
             // Proceed
@@ -97,7 +81,7 @@ async fn run_animation(frames: &crate::frames::AnimatedFrames, text: Option<&str
 
     loop {
         let exit_rx = exit_tx.subscribe();
-        match display_animation_once(frames, text, exit_rx).await {
+        match display_animation_once(frames, exit_rx).await {
             Ok(should_exit) => {
                 if should_exit {
                     break;

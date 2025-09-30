@@ -145,12 +145,8 @@ pub fn spawn_exit_listener(exit_tx: broadcast::Sender<()>) {
 
 pub async fn display_animation_once(
     frames: &AnimatedFrames,
-    text: Option<&str>,
     mut exit_rx: broadcast::Receiver<()>,
 ) -> io::Result<bool> {
-    let (term_width, _) = terminal::size()?;
-    let bubble_max_width = (term_width as usize).saturating_sub(40).max(20); // Reserve space for animation
-    let bubble = text.map(|t| create_speech_bubble_with_tail(t, bubble_max_width));
     let (term_width, term_height) = terminal::size()?;
 
     // Get animation dimensions from the first frame
@@ -170,13 +166,7 @@ pub async fn display_animation_once(
         execute!(stdout(), Clear(ClearType::All))?;
 
         // Calculate display area
-        let total_width = if let Some(ref bubble) = bubble {
-            let bubble_width = bubble.iter().map(|line| line.len()).max().unwrap_or(0) as u16;
-            animation_width + bubble_width + 2 // 2 for spacing
-        } else {
-            animation_width
-        };
-
+        let total_width = animation_width;
         let total_height = animation_height;
 
         let start_x = (term_width.saturating_sub(total_width)) / 2;
@@ -185,21 +175,6 @@ pub async fn display_animation_once(
         // Display current frame
         for (i, line) in current_frame.lines.iter().enumerate() {
             execute!(stdout(), MoveTo(start_x, start_y + i as u16), Print(line))?;
-        }
-
-        // Display bubble if present
-        if let Some(ref bubble) = bubble {
-            let bubble_start_x = start_x + animation_width + 2;
-            let bubble_start_y =
-                start_y + (animation_height.saturating_sub(bubble.len() as u16)) / 2;
-
-            for (i, line) in bubble.iter().enumerate() {
-                execute!(
-                    stdout(),
-                    MoveTo(bubble_start_x, bubble_start_y + i as u16),
-                    Print(line)
-                )?;
-            }
         }
 
         stdout().flush()?;
