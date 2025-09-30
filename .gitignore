@@ -1,0 +1,26 @@
+# Rust 빌드 결과물
+/target/
+**/*.rs.bk
+
+# IDE 파일들
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS 관련 파일들
+.DS_Store
+Thumbs.db
+
+# 로그 파일들
+*.log
+
+# 환경 설정 파일들
+.env
+.env.local
+.env.*.local
+
+# 백업 파일들
+*~
+*.tmp
+*.bak
