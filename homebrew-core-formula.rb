@@ -19,6 +19,6 @@ class Dororong < Formula
 
   test do
     assert_match "dororong", shell_output("#{bin}/dororong --help")
-    assert_match "v0.1.0", shell_output("#{bin}/dororong --version")
+    assert_match "0.1.0", shell_output("#{bin}/dororong --version")
   end
 end
