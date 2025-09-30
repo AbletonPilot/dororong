@@ -74,8 +74,7 @@ jobs:
 
           # Verify binary exists and create a working copy
           if [ ! -f "$BINARY_NAME" ]; then
-            echo "Error: Binary $BINARY_NAME not found!"
-            ls -la
+            echo "Error: Binary not found"
             exit 1
           fi
 
@@ -148,31 +147,16 @@ jobs:
 
       - name: List release assets
         run: |
-          echo "All files in current directory:"
-          ls -la
-          echo ""
-          echo "Archives:"
-          ls -la *.tar.gz *.zip 2>/dev/null || echo "No archives found"
-          echo ""
-          echo "Binaries:"
-          ls -la dororong-* 2>/dev/null || echo "No binaries found"
+          echo "Release assets prepared"
+          ls -1 *.tar.gz *.zip dororong-* 2>/dev/null | wc -l | xargs echo "Total files:"
 
       - name: Calculate checksums
         run: |
-          # Calculate SHA256 for all assets
           for file in *.tar.gz *.zip dororong-*; do
             if [ -f "$file" ]; then
               sha256sum "$file" >> SHA256SUMS
             fi
           done
-
-          # Save specific hashes for Homebrew formula update
-          if [ -f "dororong-macos-x86_64" ]; then
-            echo "MACOS_X86_64_SHA=$(sha256sum dororong-macos-x86_64 | cut -d' ' -f1)" >> $GITHUB_ENV
-          fi
-          if [ -f "dororong-macos-aarch64" ]; then
-            echo "MACOS_AARCH64_SHA=$(sha256sum dororong-macos-aarch64 | cut -d' ' -f1)" >> $GITHUB_ENV
-          fi
 
       - name: Create release
         uses: softprops/action-gh-release@v2
@@ -184,35 +168,10 @@ jobs:
             SHA256SUMS
           generate_release_notes: true
           body: |
-            ## 설치 방법
-
-            ### Homebrew (macOS)
-            ```bash
-            brew tap AbletonPilot/tap
-            brew install dororong
-            ```
-
-            ### 직접 다운로드
-            1. 아래에서 당신의 플랫폼에 맞는 파일을 다운로드하세요
-            2. 압축을 풀고 실행 파일을 PATH에 추가하세요
-
-            ### 지원 플랫폼
-            - **Linux**: x86_64, aarch64
-            - **macOS**: x86_64 (Intel), aarch64 (Apple Silicon)
-            - **Windows**: x86_64
-
-            SHA256 체크섬은 `SHA256SUMS` 파일에서 확인할 수 있습니다.
+            Download the appropriate binary for your platform and add it to your PATH.
+            
+            **Supported Platforms**: Linux (x86_64, aarch64), macOS (x86_64, aarch64), Windows (x86_64)
+            
+            SHA256 checksums are in the SHA256SUMS file.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  submit-to-homebrew-core:
-    needs: release
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    steps:
-      - name: Submit to Homebrew Core
-        uses: dawidd6/action-homebrew-bump-formula@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          formula: dororong
