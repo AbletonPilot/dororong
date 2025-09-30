@@ -1,26 +1,30 @@
-use crate::frames::{Frame, AnimatedFrames};
+use crate::frames::{AnimatedFrames, Frame};
 use crossterm::{
-    cursor::{MoveTo, Hide, Show},
+    cursor::{Hide, MoveTo, Show},
     event::{self, Event, KeyCode, KeyModifiers},
     execute,
     style::Print,
     terminal::{self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{self, stdout, Write};
-use tokio::time::{Duration as TokioDuration, sleep};
-use tokio::sync::broadcast;
 use std::time::Duration;
+use tokio::sync::broadcast;
+use tokio::time::{sleep, Duration as TokioDuration};
 
-const ANIMATION_WIDTH: u16 = 64;
-const ANIMATION_HEIGHT: u16 = 29;
-const MIN_TERMINAL_WIDTH: u16 = 72;
+const MIN_TERMINAL_WIDTH: u16 = 60;
 const MIN_TERMINAL_HEIGHT: u16 = 30;
+
+fn get_animation_dimensions(frame: &Frame) -> (u16, u16) {
+    let width = frame.lines.iter().map(|line| line.len()).max().unwrap_or(0) as u16;
+    let height = frame.lines.len() as u16;
+    (width, height)
+}
 
 pub fn create_speech_bubble_with_tail(text: &str, max_width: usize) -> Vec<String> {
     let words: Vec<&str> = text.split_whitespace().collect();
     let mut lines = Vec::new();
     let mut current_line = String::new();
-    
+
     for word in words {
         if current_line.is_empty() {
             current_line = word.to_string();
@@ -32,59 +36,60 @@ pub fn create_speech_bubble_with_tail(text: &str, max_width: usize) -> Vec<Strin
             current_line = word.to_string();
         }
     }
-    
+
     if !current_line.is_empty() {
         lines.push(current_line);
     }
-    
+
     if lines.is_empty() {
         lines.push(String::new());
     }
-    
-    let bubble_width = lines.iter().map(|line| line.len()).max().unwrap_or(0).max(1);
+
+    let bubble_width = lines
+        .iter()
+        .map(|line| line.len())
+        .max()
+        .unwrap_or(0)
+        .max(1);
     let mut bubble = Vec::new();
-    
+
     // Top border
     bubble.push(format!("┌{}┐", "─".repeat(bubble_width + 2)));
-    
+
     // Content lines
     for line in &lines {
         bubble.push(format!("│ {line:<bubble_width$} │"));
     }
-    
+
     // Bottom border
     bubble.push(format!("└{}┘", "─".repeat(bubble_width + 2)));
-    
+
     // Add tail pointing to dororong (left side) using / characters
     // Add connecting lines with / pointing toward dororong
     bubble.push("   /".to_string());
     bubble.push("  /".to_string());
     bubble.push(" /".to_string());
-    
+
     bubble
 }
 
 pub fn display_say_command(frame: &Frame, text: &str) {
     let bubble = create_speech_bubble_with_tail(text, 30);
     let frame_lines = &frame.lines;
-    
+
     let max_frame_height = frame_lines.len();
     let max_bubble_height = bubble.len();
     let max_height = max_frame_height.max(max_bubble_height);
-    
+
     for i in 0..max_height {
         let frame_line = if i < frame_lines.len() {
             frame_lines[i]
         } else {
             ""
         };
-        
-        let bubble_line = if i < bubble.len() {
-            &bubble[i]
-        } else {
-            ""
-        };
-        
+
+        let bubble_line = if i < bubble.len() { &bubble[i] } else { "" };
+
         println!("{frame_line} {bubble_line}");
     }
 }
@@ -117,72 +122,91 @@ pub fn spawn_exit_listener(exit_tx: broadcast::Sender<()>) {
                         match key_event.code {
                             KeyCode::Char('q') => return true,
                             KeyCode::Esc => return true,
-                            KeyCode::Char('c') if key_event.modifiers.contains(KeyModifiers::CONTROL) => return true,
+                            KeyCode::Char('c')
+                                if key_event.modifiers.contains(KeyModifiers::CONTROL) =>
+                            {
+                                return true
+                            }
                             _ => {}
                         }
                     }
                 }
                 false
-            }).await {
+            })
+            .await
+            {
                 let _ = exit_tx.send(());
                 break;
             }
-                         sleep(TokioDuration::from_millis(10)).await;
+            sleep(TokioDuration::from_millis(10)).await;
         }
     });
 }
 
 pub async fn display_animation_once(
-    frames: &AnimatedFrames, 
+    frames: &AnimatedFrames,
     text: Option<&str>,
-    mut exit_rx: broadcast::Receiver<()>
+    mut exit_rx: broadcast::Receiver<()>,
 ) -> io::Result<bool> {
-    let bubble = text.map(|t| create_speech_bubble_with_tail(t, 30));
+    let (term_width, _) = terminal::size()?;
+    let bubble_max_width = (term_width as usize).saturating_sub(40).max(20); // Reserve space for animation
+    let bubble = text.map(|t| create_speech_bubble_with_tail(t, bubble_max_width));
     let (term_width, term_height) = terminal::size()?;
-    let mut stdout = stdout();
-    
+
+    // Get animation dimensions from the first frame
+    let (animation_width, animation_height) = if let Some(first_frame) = frames.frames.first() {
+        get_animation_dimensions(first_frame)
+    } else {
+        (0, 0)
+    };
+
     for (current_frame, interval) in frames.iter() {
         // Check for exit signal at the start of each frame
         if exit_rx.try_recv().is_ok() {
             return Ok(true); // Exit requested
         }
-        
+
         // Clear screen
-        execute!(stdout, Clear(ClearType::All))?;
-        
+        execute!(stdout(), Clear(ClearType::All))?;
+
         // Calculate display area
         let total_width = if let Some(ref bubble) = bubble {
             let bubble_width = bubble.iter().map(|line| line.len()).max().unwrap_or(0) as u16;
-            ANIMATION_WIDTH + bubble_width + 2 // 2 for spacing
+            animation_width + bubble_width + 2 // 2 for spacing
         } else {
-            ANIMATION_WIDTH
+            animation_width
         };
-        
-        let total_height = ANIMATION_HEIGHT;
-        
+
+        let total_height = animation_height;
+
         let start_x = (term_width.saturating_sub(total_width)) / 2;
         let start_y = (term_height.saturating_sub(total_height)) / 2;
-        
+
         // Display current frame
         for (i, line) in current_frame.lines.iter().enumerate() {
-            execute!(stdout, MoveTo(start_x, start_y + i as u16), Print(line))?;
+            execute!(stdout(), MoveTo(start_x, start_y + i as u16), Print(line))?;
         }
-        
+
         // Display bubble if present
         if let Some(ref bubble) = bubble {
-            let bubble_start_x = start_x + ANIMATION_WIDTH + 2;
-            let bubble_start_y = start_y + (ANIMATION_HEIGHT.saturating_sub(bubble.len() as u16)) / 2;
-            
+            let bubble_start_x = start_x + animation_width + 2;
+            let bubble_start_y =
+                start_y + (animation_height.saturating_sub(bubble.len() as u16)) / 2;
+
             for (i, line) in bubble.iter().enumerate() {
-                execute!(stdout, MoveTo(bubble_start_x, bubble_start_y + i as u16), Print(line))?;
+                execute!(
+                    stdout(),
+                    MoveTo(bubble_start_x, bubble_start_y + i as u16),
+                    Print(line)
+                )?;
             }
         }
-        
-        stdout.flush()?;
-        
+
+        stdout().flush()?;
+
         // Use tokio::select! to wait for either frame duration or exit signal
         let frame_duration = TokioDuration::from_millis(interval);
-        
+
         tokio::select! {
             _ = sleep(frame_duration) => {
                 // Frame duration completed, continue to next frame
@@ -192,7 +216,6 @@ pub async fn display_animation_once(
             }
         }
     }
-    
-    Ok(false) // No exit requested
-} 
 
+    Ok(false) // No exit requested
+}

@@ -22,6 +22,44 @@ const BOKBOK_FRAME_STR: [&str; 4] = [
     include_str!("../frames/bokbok/dororong-bokbok-3.txt"),
     include_str!("../frames/bokbok/dororong-bokbok-4.txt"),
 ];
+const DANCE_FRAME_STR: [&str; 13] = [
+    include_str!("../frames/dance/dororong-dance-1.txt"),
+    include_str!("../frames/dance/dororong-dance-2.txt"),
+    include_str!("../frames/dance/dororong-dance-3.txt"),
+    include_str!("../frames/dance/dororong-dance-4.txt"),
+    include_str!("../frames/dance/dororong-dance-5.txt"),
+    include_str!("../frames/dance/dororong-dance-6.txt"),
+    include_str!("../frames/dance/dororong-dance-7.txt"),
+    include_str!("../frames/dance/dororong-dance-8.txt"),
+    include_str!("../frames/dance/dororong-dance-9.txt"),
+    include_str!("../frames/dance/dororong-dance-10.txt"),
+    include_str!("../frames/dance/dororong-dance-11.txt"),
+    include_str!("../frames/dance/dororong-dance-12.txt"),
+    include_str!("../frames/dance/dororong-dance-13.txt"),
+];
+const FRONTBACK_FRAME_STR: [&str; 4] = [
+    include_str!("../frames/frontback/dororong-frontback-1.txt"),
+    include_str!("../frames/frontback/dororong-frontback-2.txt"),
+    include_str!("../frames/frontback/dororong-frontback-3.txt"),
+    include_str!("../frames/frontback/dororong-frontback-4.txt"),
+];
+const UPDOWN_FRAME_STR: [&str; 15] = [
+    include_str!("../frames/updown/dororong-updown-1.txt"),
+    include_str!("../frames/updown/dororong-updown-2.txt"),
+    include_str!("../frames/updown/dororong-updown-3.txt"),
+    include_str!("../frames/updown/dororong-updown-4.txt"),
+    include_str!("../frames/updown/dororong-updown-5.txt"),
+    include_str!("../frames/updown/dororong-updown-6.txt"),
+    include_str!("../frames/updown/dororong-updown-7.txt"),
+    include_str!("../frames/updown/dororong-updown-8.txt"),
+    include_str!("../frames/updown/dororong-updown-9.txt"),
+    include_str!("../frames/updown/dororong-updown-10.txt"),
+    include_str!("../frames/updown/dororong-updown-11.txt"),
+    include_str!("../frames/updown/dororong-updown-12.txt"),
+    include_str!("../frames/updown/dororong-updown-13.txt"),
+    include_str!("../frames/updown/dororong-updown-14.txt"),
+    include_str!("../frames/updown/dororong-updown-15.txt"),
+];
 
 #[derive(Debug, Clone)]
 pub struct Frame {
@@ -58,7 +96,7 @@ impl Iterator for AnimatedFramesIterator {
             return None;
         }
         let max_index = self.frames.len().max(self.interval_ms.len()) - 1;
-        if self.current_frame >= max_index {
+        if self.current_frame > max_index {
             return None;
         }
         let frame = self.frames[self.current_frame].clone();
@@ -68,151 +106,109 @@ impl Iterator for AnimatedFramesIterator {
     }
 }
 
-lazy_static! {
-    pub static ref STATIC_FRAME: Frame = Frame {
-        lines: STATIC_FRAME_STR
+fn create_frame_from_str(frame_str: &'static str) -> Frame {
+    Frame {
+        lines: frame_str
             .lines()
             .map(|line| line.strip_suffix('\r').unwrap_or(line))
             .collect(),
-    };
-    
-    // Bokbok animations (normal and fast)
-    pub static ref BOKBOK_FRAMES: AnimatedFrames = {
-        let frames = BOKBOK_FRAME_STR
-            .iter()
-            .map(|frame| Frame {
-                lines: frame
-                    .lines()
-                    .map(|line| line.strip_suffix('\r').unwrap_or(line))
-                    .collect(),
-            })
-            .collect::<Box<[Frame]>>();
-        AnimatedFrames {
-            frames: Arc::new([
-                frames[0].clone(),
-                frames[1].clone(),
-                frames[2].clone(),
-                frames[3].clone(),
-                frames[2].clone(),
-                frames[1].clone(),
-            ]),
-            interval_ms: Arc::new([100, 75, 100, 75, 75, 100]),
-        }
-    };
-    
-    pub static ref BOKBOK_FRAMES_FAST: AnimatedFrames = {
-        let frames = BOKBOK_FRAME_STR
-            .iter()
-            .map(|frame| Frame {
-                lines: frame
-                    .lines()
-                    .map(|line| line.strip_suffix('\r').unwrap_or(line))
-                    .collect(),
-            })
-            .collect::<Box<[Frame]>>();
-        AnimatedFrames {
-            frames: Arc::new([
-                frames[0].clone(),
-                frames[1].clone(),
-                frames[2].clone(),
-                frames[3].clone(),
-                frames[2].clone(),
-                frames[1].clone(),
-            ]),
-            interval_ms: Arc::new([50, 40, 50, 40, 40, 50]),
-        }
-    };
-    
-    // Pangpang animations (normal and fast)
-    pub static ref PANGPANG_FRAMES: AnimatedFrames = {
-        let frames = PANGPANG_FRAME_STR
-            .iter()
-            .map(|frame| Frame {
-                lines: frame
-                    .lines()
-                    .map(|line| line.strip_suffix('\r').unwrap_or(line))
-                    .collect(),
-            })
-            .collect::<Box<[Frame]>>();
-        AnimatedFrames {
-            frames: Arc::new([
-                frames[0].clone(),
-                frames[1].clone(),
-                frames[2].clone(),
-                frames[1].clone(),
-            ]),
-            interval_ms: Arc::new([150, 100, 150, 100]),
-        }
-    };
-    
-    pub static ref PANGPANG_FRAMES_FAST: AnimatedFrames = {
-        let frames = PANGPANG_FRAME_STR
-            .iter()
-            .map(|frame| Frame {
-                lines: frame
-                    .lines()
-                    .map(|line| line.strip_suffix('\r').unwrap_or(line))
-                    .collect(),
-            })
-            .collect::<Box<[Frame]>>();
-        AnimatedFrames {
-            frames: Arc::new([
-                frames[0].clone(),
-                frames[1].clone(),
-                frames[2].clone(),
-                frames[1].clone(),
-            ]),
-            interval_ms: Arc::new([75, 50, 75, 50]),
-        }
-    };
-    
-    // Run animations (normal and fast)
-    pub static ref RUN_FRAMES: AnimatedFrames = {
-        let frames = RUN_FRAMES_STR
-            .iter()
-            .map(|frame| Frame {
-                lines: frame
-                    .lines()
-                    .map(|line| line.strip_suffix('\r').unwrap_or(line))
-                    .collect(),
-            })
-            .collect::<Box<[Frame]>>();
-        AnimatedFrames {
-            frames: Arc::new([
-                frames[0].clone(),
-                frames[1].clone(),
-                frames[2].clone(),
-                frames[3].clone(),
-                frames[4].clone(),
-                frames[5].clone(),
-                frames[6].clone(),
-            ]),
-            interval_ms: Arc::new([60, 60, 60, 60, 60, 60, 60]),
-        }
-    };
-    
-    pub static ref RUN_FRAMES_FAST: AnimatedFrames = {
-        let frames = RUN_FRAMES_STR
-            .iter()
-            .map(|frame| Frame {
-                lines: frame
-                    .lines()
-                    .map(|line| line.strip_suffix('\r').unwrap_or(line))
-                    .collect(),
-            })
-            .collect::<Box<[Frame]>>();
-        AnimatedFrames {
-            frames: Arc::new([
-                frames[0].clone(),
-                frames[1].clone(),
-                frames[2].clone(),
-                frames[3].clone(),
-                frames[4].clone(),
-                frames[5].clone(),
-                frames[6].clone(),
-            ]),
-            interval_ms: Arc::new([30, 30, 30, 30, 30, 30, 30]),
-        }
-    };
+    }
 }
 
+fn create_animated_frames(
+    frame_strs: &[&'static str],
+    frame_order: &[usize],
+    intervals: &[u64],
+) -> AnimatedFrames {
+    let frames: Vec<Frame> = frame_strs
+        .iter()
+        .map(|s| create_frame_from_str(s))
+        .collect();
+    let ordered_frames: Vec<Frame> = frame_order.iter().map(|&i| frames[i].clone()).collect();
+    AnimatedFrames {
+        frames: Arc::from(ordered_frames.into_boxed_slice()),
+        interval_ms: Arc::from(intervals.to_vec().into_boxed_slice()),
+    }
+}
+
+lazy_static! {
+    pub static ref STATIC_FRAME: Frame = create_frame_from_str(STATIC_FRAME_STR);
+
+    // Bokbok animations (normal and fast)
+    pub static ref BOKBOK_FRAMES: AnimatedFrames = create_animated_frames(
+        &BOKBOK_FRAME_STR,
+        &[0, 1, 2, 3],
+        &[60, 60, 60, 60],
+    );
+
+    pub static ref BOKBOK_FRAMES_FAST: AnimatedFrames = create_animated_frames(
+        &BOKBOK_FRAME_STR,
+        &[0, 1, 2, 3],
+        &[30, 30, 30, 30],
+    );
+
+    // Pangpang animations (normal and fast)
+    pub static ref PANGPANG_FRAMES: AnimatedFrames = create_animated_frames(
+        &PANGPANG_FRAME_STR,
+        &[0, 1, 2],
+        &[60, 60, 60],
+    );
+
+    pub static ref PANGPANG_FRAMES_FAST: AnimatedFrames = create_animated_frames(
+        &PANGPANG_FRAME_STR,
+        &[0, 1, 2],
+        &[30, 30, 30],
+    );
+
+    // Run animations (normal and fast)
+    pub static ref RUN_FRAMES: AnimatedFrames = create_animated_frames(
+        &RUN_FRAMES_STR,
+        &[0, 1, 2, 3, 4, 5, 6],
+        &[60, 60, 60, 60, 60, 60, 60],
+    );
+
+    pub static ref RUN_FRAMES_FAST: AnimatedFrames = create_animated_frames(
+        &RUN_FRAMES_STR,
+        &[0, 1, 2, 3, 4, 5, 6],
+        &[30, 30, 30, 30, 30, 30, 30],
+    );
+
+    // Dance animations (normal and fast)
+    pub static ref DANCE_FRAMES: AnimatedFrames = create_animated_frames(
+        &DANCE_FRAME_STR,
+        &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        &[100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+    );
+
+    pub static ref DANCE_FRAMES_FAST: AnimatedFrames = create_animated_frames(
+        &DANCE_FRAME_STR,
+        &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        &[50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+    );
+
+    // Frontback animations (normal and fast)
+    pub static ref FRONTBACK_FRAMES: AnimatedFrames = create_animated_frames(
+        &FRONTBACK_FRAME_STR,
+        &[0, 1, 2, 3],
+        &[60, 60, 60, 60],
+    );
+
+    pub static ref FRONTBACK_FRAMES_FAST: AnimatedFrames = create_animated_frames(
+        &FRONTBACK_FRAME_STR,
+        &[0, 1, 2, 3],
+        &[30, 30, 30, 30],
+    );
+
+    // Updown animations (normal and fast)
+    pub static ref UPDOWN_FRAMES: AnimatedFrames = create_animated_frames(
+        &UPDOWN_FRAME_STR,
+        &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        &[60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60],
+    );
+
+    pub static ref UPDOWN_FRAMES_FAST: AnimatedFrames = create_animated_frames(
+        &UPDOWN_FRAME_STR,
+        &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        &[30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+    );
+}

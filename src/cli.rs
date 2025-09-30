@@ -40,4 +40,28 @@ pub enum Commands {
         #[arg(short, long)]
         fast: bool,
     },
+    /// Dance animation
+    #[command(name = "dance")]
+    Dance {
+        text: Option<String>,
+        /// Fast version of animation
+        #[arg(short, long)]
+        fast: bool,
+    },
+    /// Frontback animation
+    #[command(name = "frontback")]
+    Frontback {
+        text: Option<String>,
+        /// Fast version of animation
+        #[arg(short, long)]
+        fast: bool,
+    },
+    /// Updown animation
+    #[command(name = "updown")]
+    Updown {
+        text: Option<String>,
+        /// Fast version of animation
+        #[arg(short, long)]
+        fast: bool,
+    },
 }

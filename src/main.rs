@@ -1,12 +1,17 @@
 mod cli;
-mod frames;
 mod display;
+mod frames;
 
 use crate::cli::{Cli, Commands};
-use crate::frames::{STATIC_FRAME, BOKBOK_FRAMES, BOKBOK_FRAMES_FAST, 
-                   PANGPANG_FRAMES, PANGPANG_FRAMES_FAST, 
-                   RUN_FRAMES, RUN_FRAMES_FAST};
-use crate::display::{display_say_command, display_animation_once, check_terminal_size, setup_terminal, cleanup_terminal, spawn_exit_listener};
+use crate::display::{
+    check_terminal_size, cleanup_terminal, display_animation_once, display_say_command,
+    setup_terminal, spawn_exit_listener,
+};
+use crate::frames::{
+    BOKBOK_FRAMES, BOKBOK_FRAMES_FAST, DANCE_FRAMES, DANCE_FRAMES_FAST, FRONTBACK_FRAMES,
+    FRONTBACK_FRAMES_FAST, PANGPANG_FRAMES, PANGPANG_FRAMES_FAST, RUN_FRAMES, RUN_FRAMES_FAST,
+    STATIC_FRAME, UPDOWN_FRAMES, UPDOWN_FRAMES_FAST,
+};
 use clap::Parser;
 use tokio::sync::broadcast;
 
@@ -19,43 +24,68 @@ async fn main() {
             display_say_command(&STATIC_FRAME, &text);
         }
         Commands::Bokbok { text, fast } => {
-            let frames = if fast {
-                &*BOKBOK_FRAMES_FAST
-            } else {
-                &*BOKBOK_FRAMES
-            };
-            
-            run_animation(frames, text.as_deref()).await;
+            run_animation_with_speed(&BOKBOK_FRAMES, &BOKBOK_FRAMES_FAST, fast, text.as_deref())
+                .await;
         }
         Commands::Pangpang { text, fast } => {
-            let frames = if fast {
-                &*PANGPANG_FRAMES_FAST
-            } else {
-                &*PANGPANG_FRAMES
-            };
-            
-            run_animation(frames, text.as_deref()).await;
+            run_animation_with_speed(
+                &PANGPANG_FRAMES,
+                &PANGPANG_FRAMES_FAST,
+                fast,
+                text.as_deref(),
+            )
+            .await;
         }
         Commands::Run { text, fast } => {
-            let frames = if fast {
-                &*RUN_FRAMES_FAST
-            } else {
-                &*RUN_FRAMES
-            };
-            
-            run_animation(frames, text.as_deref()).await;
+            run_animation_with_speed(&RUN_FRAMES, &RUN_FRAMES_FAST, fast, text.as_deref()).await;
+        }
+        Commands::Dance { text, fast } => {
+            run_animation_with_speed(&DANCE_FRAMES, &DANCE_FRAMES_FAST, fast, text.as_deref())
+                .await;
+        }
+        Commands::Frontback { text, fast } => {
+            run_animation_with_speed(
+                &FRONTBACK_FRAMES,
+                &FRONTBACK_FRAMES_FAST,
+                fast,
+                text.as_deref(),
+            )
+            .await;
+        }
+        Commands::Updown { text, fast } => {
+            run_animation_with_speed(&UPDOWN_FRAMES, &UPDOWN_FRAMES_FAST, fast, text.as_deref())
+                .await;
         }
     }
 }
 
+async fn run_animation_with_speed(
+    normal_frames: &crate::frames::AnimatedFrames,
+    fast_frames: &crate::frames::AnimatedFrames,
+    fast: bool,
+    text: Option<&str>,
+) {
+    let frames = if fast { fast_frames } else { normal_frames };
+    run_animation(frames, text).await;
+}
+
 async fn run_animation(frames: &crate::frames::AnimatedFrames, text: Option<&str>) {
-    if !check_terminal_size().unwrap_or(false) {
-        println!("your terminal is too small for dororong");
-        return;
+    match check_terminal_size() {
+        Ok(true) => {
+            // Proceed
+        }
+        Ok(false) => {
+            println!("Terminal is too small. Minimum 60x30 size is required.");
+            return;
+        }
+        Err(e) => {
+            eprintln!("terminal size check error: {e}");
+            return;
+        }
     }
 
     if let Err(e) = setup_terminal() {
-        eprintln!("Error setting up terminal: {e}");
+        eprintln!("terminal setting error: {e}");
         std::process::exit(1);
     }
 
@@ -74,15 +104,14 @@ async fn run_animation(frames: &crate::frames::AnimatedFrames, text: Option<&str
                 }
             }
             Err(e) => {
-                eprintln!("Error during animation: {e}");
+                eprintln!("animation error: {e}");
                 break;
             }
         }
     }
 
     if let Err(e) = cleanup_terminal() {
-        eprintln!("Error cleaning up terminal: {e}");
+        eprintln!("terminal cleanup error: {e}");
         std::process::exit(1);
     }
 }
-
