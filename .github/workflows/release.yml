@@ -46,16 +46,16 @@ jobs:
           # Get absolute paths
           WORKSPACE_DIR=$(pwd)
           TARGET_DIR="$WORKSPACE_DIR/target/${{ matrix.target }}/release"
-          
+
           # Determine binary name based on OS
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             BINARY_NAME="dororong.exe"
           else
             BINARY_NAME="dororong"
           fi
-          
+
           BINARY_PATH="$TARGET_DIR/$BINARY_NAME"
-          
+
           # Verify binary exists
           if [ ! -f "$BINARY_PATH" ]; then
             echo "Error: Binary not found: $BINARY_PATH"
@@ -63,18 +63,18 @@ jobs:
             ls -la "$TARGET_DIR"
             exit 1
           fi
-          
+
           echo "Found binary at: $BINARY_PATH"
-          
+
           # Create archive directory
           mkdir -p "$TARGET_DIR/archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/"
-          
+
           # Copy binary to archive using absolute path
           cp "$BINARY_PATH" "$TARGET_DIR/archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/"
-          
+
           # Copy additional files
           cp "$WORKSPACE_DIR/README.md" "$TARGET_DIR/archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/"
-          
+
           # Create archive
           cd "$TARGET_DIR/archive"
           if [ "${{ matrix.archive }}" == "zip" ]; then
@@ -84,46 +84,12 @@ jobs:
             tar -czf "../dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" "dororong-${{ github.ref_name }}-${{ matrix.target }}/"
             echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
           fi
-          
-          # Copy standalone binary using absolute path
-          cp "$BINARY_PATH" "$TARGET_DIR/${{ matrix.name }}"
-          echo "STANDALONE_BINARY=${{ matrix.name }}" >> $GITHUB_ENV
-
-          # Create archive directory
-          mkdir -p archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-
-          # Copy binary to archive
-          cp "$BINARY_NAME" archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-
-          # Copy additional files
-          cp ../../../README.md archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-
-          # Create archive
-          cd archive
-          if [ "${{ matrix.archive }}" == "zip" ]; then
-            zip -r ../dororong-${{ github.ref_name }}-${{ matrix.target }}.zip dororong-${{ github.ref_name }}-${{ matrix.target }}/
-            echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.zip" >> $GITHUB_ENV
-          else
-            tar -czf ../dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz dororong-${{ github.ref_name }}-${{ matrix.target }}/
-            echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
-          fi
-
-          # Copy standalone binary
-          cd ../..
-          cp "$BINARY_NAME" "${{ matrix.name }}"
-          echo "STANDALONE_BINARY=${{ matrix.name }}" >> $GITHUB_ENV
 
       - name: Upload archive
         uses: actions/upload-artifact@v4
         with:
           name: archive-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ env.ASSET_NAME }}
-
-      - name: Upload binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: binary-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/${{ env.STANDALONE_BINARY }}
 
   release:
     needs: build
@@ -146,15 +112,9 @@ jobs:
             fi
           done
 
-          # Move binaries to root
-          find binary-* -type f | while read file; do
-            basename_file=$(basename "$file")
-            cp "$file" "$basename_file"
-          done
-
       - name: Calculate checksums
         run: |
-          for file in *.tar.gz *.zip dororong-*; do
+          for file in *.tar.gz *.zip; do
             if [ -f "$file" ]; then
               sha256sum "$file" >> SHA256SUMS
             fi
@@ -166,7 +126,6 @@ jobs:
           files: |
             *.tar.gz
             *.zip
-            dororong-*
             SHA256SUMS
           generate_release_notes: true
           body: |

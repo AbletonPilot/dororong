@@ -58,15 +58,10 @@ sudo snap remove dororong  # Uninstall
 
 #### Manual Installation
 ```bash
-# Intel/AMD 64-bit
-wget https://github.com/AbletonPilot/dororong/releases/latest/download/dororong-linux-x86_64.tar.gz
-tar -xzf dororong-linux-x86_64.tar.gz
-sudo mv dororong-*/dororong /usr/local/bin/
-
-# ARM 64-bit
-wget https://github.com/AbletonPilot/dororong/releases/latest/download/dororong-linux-aarch64.tar.gz
-tar -xzf dororong-linux-aarch64.tar.gz
-sudo mv dororong-*/dororong /usr/local/bin/
+# Download and extract the archive for your platform
+wget https://github.com/AbletonPilot/dororong/releases/latest/download/dororong-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf dororong-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
+sudo mv dororong-v0.1.0-x86_64-unknown-linux-gnu/dororong /usr/local/bin/
 ```
 
 ### Windows
@@ -79,7 +74,7 @@ choco uninstall dororong  # Uninstall
 ```
 
 #### Manual Installation
-1. Download `dororong-windows-x86_64.zip` from [Releases page](https://github.com/AbletonPilot/dororong/releases)
+1. Download `dororong-v0.1.0-x86_64-pc-windows-msvc.zip` from [Releases page](https://github.com/AbletonPilot/dororong/releases)
 2. Extract the archive
 3. Add `dororong.exe` to PATH:
 

@@ -18,4 +18,8 @@ Install-ChocolateyZipPackage @packageArgs
 
 # Create shim for the executable
 $exePath = Join-Path $toolsDir "dororong-v$version-x86_64-pc-windows-msvc\dororong.exe"
-Install-ChocolateyShim -Name 'dororong' -Path $exePath
+if (Test-Path $exePath) {
+  Install-ChocolateyShim -Name 'dororong' -Path $exePath
+} else {
+  Write-Error "dororong.exe not found at expected path: $exePath"
+}
