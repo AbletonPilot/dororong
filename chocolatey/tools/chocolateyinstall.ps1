@@ -9,7 +9,7 @@ $packageArgs = @{
   packageName   = $packageName
   fileFullPath  = Join-Path $toolsDir "dororong.tar.gz"
   url64bit      = $url64
-  checksum64    = 'CHECKSUM64_PLACEHOLDER'
+  checksum64    = 'b41c98aa23a2da8f2a67ea209d6bf9aebc450acde4b140d4a2050ba823c171ca'
   checksumType64= 'sha256'
 }
 

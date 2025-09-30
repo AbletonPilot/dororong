@@ -2,7 +2,7 @@ class Dororong < Formula
   desc "Fun terminal animation app with dancing characters"
   homepage "https://github.com/AbletonPilot/dororong"
   url "https://github.com/AbletonPilot/dororong/archive/v0.1.0.tar.gz"
-  sha256 "PLACEHOLDER_SHA256"  # 실제 SHA256으로 교체 필요
+  sha256 "83f5f11a8b46e6bb0acfbd817db1ad9f61a903dcae43ab9998011c9844dde7f5" # Replace with actual SHA256 checksum
   license "MIT"
 
   depends_on "rust" => :build
