@@ -20,7 +20,7 @@ jobs:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             name: dororong-windows-x86_64.exe
-            archive: zip
+            archive: tar.gz
           - os: macos-latest
             target: x86_64-apple-darwin
             name: dororong-macos-x86_64
@@ -77,13 +77,8 @@ jobs:
 
           # Create archive
           cd "$TARGET_DIR/archive"
-          if [ "${{ matrix.archive }}" == "zip" ]; then
-            zip -r "../dororong-${{ github.ref_name }}-${{ matrix.target }}.zip" "dororong-${{ github.ref_name }}-${{ matrix.target }}/"
-            echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.zip" >> $GITHUB_ENV
-          else
-            tar -czf "../dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" "dororong-${{ github.ref_name }}-${{ matrix.target }}/"
-            echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
-          fi
+          tar -czf "../dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" "dororong-${{ github.ref_name }}-${{ matrix.target }}/"
+          echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
 
       - name: Upload archive
         uses: actions/upload-artifact@v4

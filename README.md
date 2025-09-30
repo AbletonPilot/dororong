@@ -1,4 +1,4 @@
-# 🐧 Dororong
+# Dororong-Cli
 
 Dororong will be dancing for you! A fun terminal animation app.
 
