@@ -10,7 +10,7 @@ $packageArgs = @{
   unzipLocation = $toolsDir
   url64bit      = $url64
   softwareName  = 'dororong*'
-  checksum64    = '0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5'
+  checksum64    = 'd232a1952f2321e365ba7f5942b1a3956373c3bae0d8d9ff48a3daa8150c065d'
   checksumType64= 'sha256'
 }
 

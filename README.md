@@ -18,8 +18,8 @@ curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/
 
 #### Manual Installation
 Download from [Releases page](https://github.com/AbletonPilot/dororong/releases):
-- `dororong-macos-x86_64` (Intel Mac)
-- `dororong-macos-aarch64` (Apple Silicon/ARM)
+- `dororong-v*-x86_64-apple-darwin.tar.gz` (Intel Mac)
+- `dororong-v*-aarch64-apple-darwin.tar.gz` (Apple Silicon/ARM)
 
 #### Homebrew (Coming Soon)
 ```bash
@@ -40,17 +40,6 @@ wget -qO- https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/i
 # Uninstall
 curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/uninstall.sh | bash
 ```
-
-#### Manual Installation
-```bash
-# Download and extract the latest release
-curl -s https://api.github.com/repos/AbletonPilot/dororong/releases/latest | \
-  grep "browser_download_url.*x86_64-unknown-linux-gnu.tar.gz" | \
-  cut -d '"' -f 4 | wget -qi -
-tar -xzf dororong-*-x86_64-unknown-linux-gnu.tar.gz
-sudo mv dororong-*/dororong /usr/local/bin/
-```
-
 ### Windows
 
 #### Manual Installation (Recommended)
