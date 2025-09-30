@@ -65,6 +65,11 @@ jobs:
         run: |
           cd target/${{ matrix.target }}/release
 
+          # Debug: List all files in current directory
+          echo "=== Files in target/${{ matrix.target }}/release ==="
+          ls -la
+          echo "=== End of file listing ==="
+
           # Determine binary name based on OS
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             BINARY_NAME="dororong.exe"
@@ -75,7 +80,10 @@ jobs:
           # Verify binary exists
           if [ ! -f "$BINARY_NAME" ]; then
             echo "Error: Binary $BINARY_NAME not found!"
-            ls -la
+            echo "Looking for any dororong* files:"
+            find . -name "dororong*" -type f
+            echo "Looking in parent directories:"
+            find ../.. -name "dororong*" -type f 2>/dev/null || echo "No dororong files found in parent dirs"
             exit 1
           fi
 
