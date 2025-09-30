@@ -44,7 +44,12 @@ jobs:
         shell: bash
         run: |
           cd target/${{ matrix.target }}/release
-
+          
+          # Debug: Show current directory and files
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -la
+          
           # Determine binary name based on OS
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             BINARY_NAME="dororong.exe"
