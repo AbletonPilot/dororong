@@ -64,10 +64,10 @@ jobs:
         shell: bash
         run: |
           cd target/${{ matrix.target }}/release
-          
+
           # Create archive directory
           mkdir -p archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-          
+
           # Copy binary
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             cp dororong.exe archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/dororong.exe
@@ -76,10 +76,10 @@ jobs:
             cp dororong archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/dororong
             binary_name="dororong"
           fi
-          
+
           # Copy additional files
           cp ../../../README.md archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-          
+
           # Create archive
           cd archive
           if [ "${{ matrix.archive }}" == "zip" ]; then
@@ -89,7 +89,7 @@ jobs:
             tar -czf ../dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz dororong-${{ github.ref_name }}-${{ matrix.target }}/
             echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
           fi
-          
+
           # Copy standalone binary for Homebrew (from original location)
           cd ../..
           cp $binary_name ${{ matrix.name }}      - name: Upload archive
@@ -193,8 +193,12 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
-      - name: Checkout code
+      - name: Checkout homebrew-tap
         uses: actions/checkout@v4
+        with:
+          repository: AbletonPilot/homebrew-tap
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: homebrew-tap
 
       - name: Download release assets
         run: |
@@ -211,20 +215,21 @@ jobs:
           x86_64_sha=$(sha256sum dororong-macos-x86_64 | cut -d' ' -f1)
           aarch64_sha=$(sha256sum dororong-macos-aarch64 | cut -d' ' -f1)
 
-          # Update Formula
-          sed -i "s/version \".*\"/version \"$version\"/" Formula/dororong.rb
-          sed -i "s/SHA256_FOR_X86_64/$x86_64_sha/" Formula/dororong.rb
-          sed -i "s/SHA256_FOR_AARCH64/$aarch64_sha/" Formula/dororong.rb
+          # Update Formula in homebrew-tap
+          sed -i "s/version \".*\"/version \"$version\"/" homebrew-tap/dororong.rb
+          sed -i "s/SHA256_FOR_X86_64/$x86_64_sha/" homebrew-tap/dororong.rb
+          sed -i "s/SHA256_FOR_AARCH64/$aarch64_sha/" homebrew-tap/dororong.rb
 
       - name: Commit and push updated formula
         run: |
+          cd homebrew-tap
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-
-          if git diff --quiet Formula/dororong.rb; then
+          
+          if git diff --quiet dororong.rb; then
             echo "No changes to commit"
           else
-            git add Formula/dororong.rb
+            git add dororong.rb
             git commit -m "Update Homebrew formula for ${GITHUB_REF#refs/tags/}"
             git push
           fi
