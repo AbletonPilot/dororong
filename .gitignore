@@ -25,6 +25,5 @@ Thumbs.db
 *.tmp
 *.bak
 
-chocolatey/
 scripts/
 homebrew-core-formula.rb

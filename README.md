@@ -53,12 +53,6 @@ $path = [Environment]::GetEnvironmentVariable("PATH", "User")
 [Environment]::SetEnvironmentVariable("PATH", "$path;C:\path\to\dororong", "User")
 ```
 
-#### Chocolatey (Coming Soon)
-```powershell
-# Will be available after Chocolatey Community approval
-choco install dororong
-```
-
 ## Usage
 
 ### Basic Commands
