@@ -140,7 +140,11 @@ jobs:
           body: |
             Download the appropriate binary for your platform and add it to your PATH.
 
-            **Supported Platforms**: Linux (x86_64), macOS (x86_64), Windows (x86_64)
+            **Supported Platforms**: 
+            - Linux (x86_64)
+            - macOS Intel (x86_64)
+            - macOS Apple Silicon (ARM)
+            - Windows (x86_64)
 
             SHA256 checksums are in the SHA256SUMS file.
         env:

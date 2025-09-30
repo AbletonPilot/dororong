@@ -59,7 +59,11 @@ main() {
     
     # Download URL configuration
     if [ "$OS" = "macos" ]; then
-        ARCHIVE_NAME="dororong-$VERSION-x86_64-apple-darwin.tar.gz"
+        if [ "$ARCH" = "aarch64" ]; then
+            ARCHIVE_NAME="dororong-$VERSION-aarch64-apple-darwin.tar.gz"
+        else
+            ARCHIVE_NAME="dororong-$VERSION-x86_64-apple-darwin.tar.gz"
+        fi
     elif [ "$OS" = "linux" ]; then
         ARCHIVE_NAME="dororong-$VERSION-x86_64-unknown-linux-gnu.tar.gz"
     else

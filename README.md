@@ -1,40 +1,31 @@
-# Dororong-Cli
+# 🐧 Dororong
 
 Dororong will be dancing for you! A fun terminal animation app.
 
 ## Quick Installation
 
-### Homebrew (macOS)
-```bash
-brew install dororong
-```
+### Download Binary (Recommended)
+Download the latest release for your platform from [GitHub Releases](https://github.com/AbletonPilot/dororong/releases)
 
 ### Linux (One-liner)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/install.sh | bash
 ```
 
-### Windows (Chocolatey)
-```powershell
-choco install dororong
-```
-
 ## Installation Methods
 
 ### macOS
 
-#### Homebrew (Recommended)
-```bash
-brew install dororong
-
-# Update
-brew upgrade dororong
-```
-
 #### Manual Installation
 Download from [Releases page](https://github.com/AbletonPilot/dororong/releases):
 - `dororong-macos-x86_64` (Intel Mac)
-- `dororong-macos-aarch64` (Apple Silicon)
+- `dororong-macos-aarch64` (Apple Silicon/ARM)
+
+#### Homebrew (Coming Soon)
+```bash
+# Will be available after Homebrew Core approval
+brew install dororong
+```
 
 ### Linux
 
@@ -52,29 +43,31 @@ curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/
 
 #### Manual Installation
 ```bash
-# Download and extract the archive for your platform
-wget https://github.com/AbletonPilot/dororong/releases/latest/download/dororong-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
-tar -xzf dororong-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
-sudo mv dororong-v0.1.0-x86_64-unknown-linux-gnu/dororong /usr/local/bin/
+# Download and extract the latest release
+curl -s https://api.github.com/repos/AbletonPilot/dororong/releases/latest | \
+  grep "browser_download_url.*x86_64-unknown-linux-gnu.tar.gz" | \
+  cut -d '"' -f 4 | wget -qi -
+tar -xzf dororong-*-x86_64-unknown-linux-gnu.tar.gz
+sudo mv dororong-*/dororong /usr/local/bin/
 ```
 
 ### Windows
 
-#### Chocolatey (Recommended)
-```powershell
-choco install dororong
-choco upgrade dororong  # Update
-choco uninstall dororong  # Uninstall
-```
-
-#### Manual Installation
-1. Download `dororong-v0.1.0-x86_64-pc-windows-msvc.zip` from [Releases page](https://github.com/AbletonPilot/dororong/releases)
+#### Manual Installation (Recommended)
+1. Download the latest Windows release from [Releases page](https://github.com/AbletonPilot/dororong/releases)
+   - Look for `dororong-v*-x86_64-pc-windows-msvc.zip`
 2. Extract the archive
 3. Add `dororong.exe` to PATH:
 
 ```powershell
 $path = [Environment]::GetEnvironmentVariable("PATH", "User")
 [Environment]::SetEnvironmentVariable("PATH", "$path;C:\path\to\dororong", "User")
+```
+
+#### Chocolatey (Coming Soon)
+```powershell
+# Will be available after Chocolatey Community approval
+choco install dororong
 ```
 
 ## Usage
