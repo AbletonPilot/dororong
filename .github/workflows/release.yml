@@ -43,31 +43,41 @@ jobs:
       - name: Package binary
         shell: bash
         run: |
+          # Debug: Show target directory
+          echo "Current directory: $(pwd)"
+          echo "Target directory exists: $(ls -la target/ || echo 'Target directory not found')"
+          echo "Target/${{ matrix.target }} directory exists: $(ls -la target/${{ matrix.target }}/ || echo 'Target specific directory not found')"
+          echo "Release directory exists: $(ls -la target/${{ matrix.target }}/release/ || echo 'Release directory not found')"
+          
           cd target/${{ matrix.target }}/release
           
+          echo "Files in release directory:"
+          ls -la
+
           # Determine binary name based on OS
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             BINARY_NAME="dororong.exe"
           else
             BINARY_NAME="dororong"
           fi
-          
+
           # Verify binary exists
           if [ ! -f "$BINARY_NAME" ]; then
             echo "Error: Binary not found: $BINARY_NAME"
+            echo "Available files:"
             ls -la
             exit 1
           fi
-          
+
           # Create archive directory
           mkdir -p archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-          
+
           # Copy binary to archive
           cp "$BINARY_NAME" archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-          
+
           # Copy additional files
           cp ../../../README.md archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
-          
+
           # Create archive
           cd archive
           if [ "${{ matrix.archive }}" == "zip" ]; then
@@ -77,7 +87,7 @@ jobs:
             tar -czf ../dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz dororong-${{ github.ref_name }}-${{ matrix.target }}/
             echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
           fi
-          
+
           # Copy standalone binary
           cd ../..
           cp "$BINARY_NAME" "${{ matrix.name }}"
@@ -141,9 +151,9 @@ jobs:
           generate_release_notes: true
           body: |
             Download the appropriate binary for your platform and add it to your PATH.
-            
+
             **Supported Platforms**: Linux (x86_64), macOS (x86_64), Windows (x86_64)
-            
+
             SHA256 checksums are in the SHA256SUMS file.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
