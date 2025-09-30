@@ -43,31 +43,51 @@ jobs:
       - name: Package binary
         shell: bash
         run: |
-          # Debug: Show target directory
-          echo "Current directory: $(pwd)"
-          echo "Target directory exists: $(ls -la target/ || echo 'Target directory not found')"
-          echo "Target/${{ matrix.target }} directory exists: $(ls -la target/${{ matrix.target }}/ || echo 'Target specific directory not found')"
-          echo "Release directory exists: $(ls -la target/${{ matrix.target }}/release/ || echo 'Release directory not found')"
+          # Get absolute paths
+          WORKSPACE_DIR=$(pwd)
+          TARGET_DIR="$WORKSPACE_DIR/target/${{ matrix.target }}/release"
           
-          cd target/${{ matrix.target }}/release
-          
-          echo "Files in release directory:"
-          ls -la
-
           # Determine binary name based on OS
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             BINARY_NAME="dororong.exe"
           else
             BINARY_NAME="dororong"
           fi
-
+          
+          BINARY_PATH="$TARGET_DIR/$BINARY_NAME"
+          
           # Verify binary exists
-          if [ ! -f "$BINARY_NAME" ]; then
-            echo "Error: Binary not found: $BINARY_NAME"
-            echo "Available files:"
-            ls -la
+          if [ ! -f "$BINARY_PATH" ]; then
+            echo "Error: Binary not found: $BINARY_PATH"
+            echo "Available files in $TARGET_DIR:"
+            ls -la "$TARGET_DIR"
             exit 1
           fi
+          
+          echo "Found binary at: $BINARY_PATH"
+          
+          # Create archive directory
+          mkdir -p "$TARGET_DIR/archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/"
+          
+          # Copy binary to archive using absolute path
+          cp "$BINARY_PATH" "$TARGET_DIR/archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/"
+          
+          # Copy additional files
+          cp "$WORKSPACE_DIR/README.md" "$TARGET_DIR/archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/"
+          
+          # Create archive
+          cd "$TARGET_DIR/archive"
+          if [ "${{ matrix.archive }}" == "zip" ]; then
+            zip -r "../dororong-${{ github.ref_name }}-${{ matrix.target }}.zip" "dororong-${{ github.ref_name }}-${{ matrix.target }}/"
+            echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.zip" >> $GITHUB_ENV
+          else
+            tar -czf "../dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" "dororong-${{ github.ref_name }}-${{ matrix.target }}/"
+            echo "ASSET_NAME=dororong-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" >> $GITHUB_ENV
+          fi
+          
+          # Copy standalone binary using absolute path
+          cp "$BINARY_PATH" "$TARGET_DIR/${{ matrix.name }}"
+          echo "STANDALONE_BINARY=${{ matrix.name }}" >> $GITHUB_ENV
 
           # Create archive directory
           mkdir -p archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
