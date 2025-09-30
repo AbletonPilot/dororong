@@ -44,7 +44,7 @@ jobs:
         shell: bash
         run: |
           cd target/${{ matrix.target }}/release
-          
+
           # Debug: Show current directory and files
           echo "Current directory: $(pwd)"
           echo "Files in current directory:"
@@ -56,18 +56,22 @@ jobs:
           else
             BINARY_NAME="dororong"
           fi
-
+          
+          # Debug: Check file status
+          echo "Binary exists: $(ls -la $BINARY_NAME)"
+          echo "File links: $(stat $BINARY_NAME | grep Links)"
+          
           # Verify binary exists and create a working copy
           if [ ! -f "$BINARY_NAME" ]; then
             echo "Error: Binary not found"
             exit 1
           fi
-
+          
           # Create a working copy to avoid hardlink issues
+          echo "Creating working copy..."
           cp "$BINARY_NAME" "${BINARY_NAME}_working_copy"
-          BINARY_NAME="${BINARY_NAME}_working_copy"
-
-          # Create archive directory
+          echo "Working copy created: $(ls -la ${BINARY_NAME}_working_copy)"
+          BINARY_NAME="${BINARY_NAME}_working_copy"          # Create archive directory
           mkdir -p archive/dororong-${{ github.ref_name }}-${{ matrix.target }}/
 
           # Copy binary to archive
@@ -155,9 +159,9 @@ jobs:
           body: |
             body: |
             Download the appropriate binary for your platform and add it to your PATH.
-            
+
             **Supported Platforms**: Linux (x86_64), macOS (x86_64), Windows (x86_64)
-            
+
             SHA256 checksums are in the SHA256SUMS file.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
