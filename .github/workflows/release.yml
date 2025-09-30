@@ -92,7 +92,9 @@ jobs:
 
           # Copy standalone binary for Homebrew (from original location)
           cd ../..
-          cp $binary_name ${{ matrix.name }}      - name: Upload archive
+          cp $binary_name ${{ matrix.name }}
+
+      - name: Upload archive
         uses: actions/upload-artifact@v4
         with:
           name: archive-${{ matrix.target }}
@@ -187,49 +189,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  update-homebrew:
+  submit-to-homebrew-core:
     needs: release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
-      - name: Checkout homebrew-tap
-        uses: actions/checkout@v4
+      - name: Submit to Homebrew Core
+        uses: dawidd6/action-homebrew-bump-formula@v3
         with:
-          repository: AbletonPilot/homebrew-tap
           token: ${{ secrets.GITHUB_TOKEN }}
-          path: homebrew-tap
-
-      - name: Download release assets
-        run: |
-          # Download the binaries for SHA calculation
-          tag_name=${GITHUB_REF#refs/tags/}
-          wget -O dororong-macos-x86_64 "https://github.com/${{ github.repository }}/releases/download/${tag_name}/dororong-macos-x86_64"
-          wget -O dororong-macos-aarch64 "https://github.com/${{ github.repository }}/releases/download/${tag_name}/dororong-macos-aarch64"
-
-      - name: Calculate SHA256 and update Homebrew formula
-        run: |
-          tag_name=${GITHUB_REF#refs/tags/}
-          version=${tag_name#v}
-
-          x86_64_sha=$(sha256sum dororong-macos-x86_64 | cut -d' ' -f1)
-          aarch64_sha=$(sha256sum dororong-macos-aarch64 | cut -d' ' -f1)
-
-          # Update Formula in homebrew-tap
-          sed -i "s/version \".*\"/version \"$version\"/" homebrew-tap/dororong.rb
-          sed -i "s/SHA256_FOR_X86_64/$x86_64_sha/" homebrew-tap/dororong.rb
-          sed -i "s/SHA256_FOR_AARCH64/$aarch64_sha/" homebrew-tap/dororong.rb
-
-      - name: Commit and push updated formula
-        run: |
-          cd homebrew-tap
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          
-          if git diff --quiet dororong.rb; then
-            echo "No changes to commit"
-          else
-            git add dororong.rb
-            git commit -m "Update Homebrew formula for ${GITHUB_REF#refs/tags/}"
-            git push
-          fi
+          formula: dororong

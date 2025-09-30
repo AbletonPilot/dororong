@@ -1,6 +1,7 @@
 name: dororong
-version: '0.1.2'
-summary: Dororong will be dancing for you! 도로롱이 당신을 위해 춤을 춰줄 거예요!e: dororong
+base: core20
+version: '0.1.0'
+summary: Interactive ASCII art animation of a cute charactere: dororong
 version: "0.1.0"
 summary: Dororong will be dancing for you! 도로롱이 당신을 위해 춤을 춰줄 거예요!
 description: |
