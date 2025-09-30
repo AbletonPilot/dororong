@@ -4,6 +4,12 @@ class Dororong < Formula
   url "https://github.com/AbletonPilot/dororong/archive/refs/tags/v0.1.0.tar.gz"
   sha256 "6e722d248763227b968c944c2bd69faaf9773ccd1e8752857620c932c30a613b"
   license "MIT"
+  head "https://github.com/AbletonPilot/dororong.git", branch: "main"
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   depends_on "rust" => :build
 
@@ -12,6 +18,7 @@ class Dororong < Formula
   end
 
   test do
-    system bin/"dororong", "--help"
+    assert_match "dororong", shell_output("#{bin}/dororong --help")
+    assert_match "v0.1.0", shell_output("#{bin}/dororong --version")
   end
 end
