@@ -21,6 +21,42 @@ error_exit() {
     exit 1
 }
 
+# Configure PATH in shell config
+configure_path() {
+    local install_dir="$1"
+    local shell_configs=()
+    
+    # Detect all possible shell configs
+    [ -f "$HOME/.zshrc" ] && shell_configs+=("$HOME/.zshrc")
+    [ -f "$HOME/.bashrc" ] && shell_configs+=("$HOME/.bashrc")
+    [ -f "$HOME/.bash_profile" ] && shell_configs+=("$HOME/.bash_profile")
+    [ -f "$HOME/.profile" ] && shell_configs+=("$HOME/.profile")
+    
+    # If no config exists, create one based on current shell
+    if [ ${#shell_configs[@]} -eq 0 ]; then
+        if [ -n "$ZSH_VERSION" ] || [[ "$SHELL" == *"zsh"* ]]; then
+            touch "$HOME/.zshrc"
+            shell_configs+=("$HOME/.zshrc")
+        else
+            touch "$HOME/.bashrc"
+            shell_configs+=("$HOME/.bashrc")
+        fi
+    fi
+    
+    local configured=false
+    for config in "${shell_configs[@]}"; do
+        if ! grep -q "$install_dir" "$config" 2>/dev/null; then
+            echo "" >> "$config"
+            echo "# Added by Dororong installer" >> "$config"
+            echo "export PATH=\"$install_dir:\$PATH\"" >> "$config"
+            print_colored "$GREEN" "Configured PATH in $config"
+            configured=true
+        fi
+    done
+    
+    return 0
+}
+
 # System detection
 detect_arch() {
     case $(uname -m) in
@@ -47,7 +83,7 @@ get_latest_version() {
 
 # Main function
 main() {
-    print_colored "$BLUE" "🎭 Starting Dororong installation..."
+    print_colored "$BLUE" "Starting Dororong installation..."
     
     # System information
     OS=$(detect_os)
@@ -116,26 +152,40 @@ main() {
         mkdir -p "$INSTALL_DIR"
     fi
     
-    # Install
+    # Install binary
     print_colored "$BLUE" "Installing to: $INSTALL_DIR/dororong"
     cp "$BINARY_FILE" "$INSTALL_DIR/dororong"
     
-    # Check PATH
+    # Configure PATH automatically
     if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
-        print_colored "$YELLOW" "Warning: $INSTALL_DIR is not in PATH."
-        print_colored "$YELLOW" "Run the following commands to add it to PATH:"
-        print_colored "$YELLOW" "echo 'export PATH=\"$INSTALL_DIR:\$PATH\"' >> ~/.bashrc"
-        print_colored "$YELLOW" "source ~/.bashrc"
+        print_colored "$BLUE" "Configuring PATH..."
+        configure_path "$INSTALL_DIR"
     fi
     
-    print_colored "$GREEN" "✅ Dororong installation completed!"
-    print_colored "$GREEN" "Usage: dororong --help"
+    # Create symlink in /usr/local/bin if possible (for immediate availability)
+    if [ "$INSTALL_DIR" != "/usr/local/bin" ] && [ -w "/usr/local/bin" ]; then
+        ln -sf "$INSTALL_DIR/dororong" "/usr/local/bin/dororong" 2>/dev/null || true
+        print_colored "$GREEN" "Created symlink in /usr/local/bin"
+    fi
     
-    # Test execution
-    if "$INSTALL_DIR/dororong" --help >/dev/null 2>&1; then
-        print_colored "$GREEN" "🎉 Installation successful!"
+    print_colored "$GREEN" "Installation completed!"
+    
+    # Verify installation
+    if command -v dororong >/dev/null 2>&1; then
+        print_colored "$GREEN" "dororong is ready to use!"
+        print_colored "$GREEN" ""
+        print_colored "$BLUE" "Try it now: ${GREEN}dororong run${NC}"
+    elif "$INSTALL_DIR/dororong" --help >/dev/null 2>&1; then
+        print_colored "$GREEN" "Binary installed successfully!"
+        print_colored "$YELLOW" ""
+        print_colored "$YELLOW" "To use 'dororong' command immediately, run:"
+        print_colored "$BLUE" "   export PATH=\"$INSTALL_DIR:\$PATH\""
+        print_colored "$YELLOW" ""
+        print_colored "$YELLOW" "Or restart your terminal (PATH already configured for next session)"
+        print_colored "$YELLOW" ""
+        print_colored "$BLUE" "For now, use: ${GREEN}$INSTALL_DIR/dororong run${NC}"
     else
-        print_colored "$YELLOW" "Installation completed but execution test failed."
+        error_exit "Installation failed - binary test unsuccessful"
     fi
 }
 
