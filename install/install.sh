@@ -141,51 +141,59 @@ main() {
     # Set executable permissions
     chmod +x "$BINARY_FILE"
     
-    # Determine installation directory
+    # Try to install to /usr/local/bin first (with sudo if needed)
+    INSTALL_DIR=""
+    NEEDS_PATH_SETUP=false
+    
     if [ -w "/usr/local/bin" ]; then
         INSTALL_DIR="/usr/local/bin"
-    elif [ -w "$HOME/.local/bin" ]; then
+        print_colored "$BLUE" "Installing to: /usr/local/bin/dororong"
+        cp "$BINARY_FILE" "/usr/local/bin/dororong"
+    elif command -v sudo >/dev/null 2>&1; then
+        print_colored "$YELLOW" "Installing to /usr/local/bin (requires sudo)..."
+        if sudo cp "$BINARY_FILE" "/usr/local/bin/dororong" 2>/dev/null && sudo chmod +x "/usr/local/bin/dororong" 2>/dev/null; then
+            INSTALL_DIR="/usr/local/bin"
+            print_colored "$GREEN" "Installed to /usr/local/bin/dororong"
+        fi
+    fi
+    
+    # Fallback to user directory if system-wide install failed
+    if [ -z "$INSTALL_DIR" ]; then
         INSTALL_DIR="$HOME/.local/bin"
         mkdir -p "$INSTALL_DIR"
-    else
-        INSTALL_DIR="$HOME/bin"
-        mkdir -p "$INSTALL_DIR"
-    fi
-    
-    # Install binary
-    print_colored "$BLUE" "Installing to: $INSTALL_DIR/dororong"
-    cp "$BINARY_FILE" "$INSTALL_DIR/dororong"
-    
-    # Configure PATH automatically
-    if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
-        print_colored "$BLUE" "Configuring PATH..."
-        configure_path "$INSTALL_DIR"
-    fi
-    
-    # Create symlink in /usr/local/bin if possible (for immediate availability)
-    if [ "$INSTALL_DIR" != "/usr/local/bin" ] && [ -w "/usr/local/bin" ]; then
-        ln -sf "$INSTALL_DIR/dororong" "/usr/local/bin/dororong" 2>/dev/null || true
-        print_colored "$GREEN" "Created symlink in /usr/local/bin"
+        print_colored "$BLUE" "Installing to: $INSTALL_DIR/dororong"
+        cp "$BINARY_FILE" "$INSTALL_DIR/dororong"
+        
+        # Configure PATH in shell config files
+        if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
+            configure_path "$INSTALL_DIR"
+            NEEDS_PATH_SETUP=true
+        fi
     fi
     
     print_colored "$GREEN" "Installation completed!"
+    print_colored "$GREEN" ""
     
-    # Verify installation
+    # Check if dororong is immediately available
     if command -v dororong >/dev/null 2>&1; then
         print_colored "$GREEN" "dororong is ready to use!"
-        print_colored "$GREEN" ""
-        print_colored "$BLUE" "Try it now: ${GREEN}dororong run${NC}"
-    elif "$INSTALL_DIR/dororong" --help >/dev/null 2>&1; then
-        print_colored "$GREEN" "Binary installed successfully!"
-        print_colored "$YELLOW" ""
-        print_colored "$YELLOW" "To use 'dororong' command immediately, run:"
-        print_colored "$BLUE" "   export PATH=\"$INSTALL_DIR:\$PATH\""
-        print_colored "$YELLOW" ""
-        print_colored "$YELLOW" "Or restart your terminal (PATH already configured for next session)"
-        print_colored "$YELLOW" ""
-        print_colored "$BLUE" "For now, use: ${GREEN}$INSTALL_DIR/dororong run${NC}"
+        print_colored "$BLUE" "Try: dororong run"
     else
-        error_exit "Installation failed - binary test unsuccessful"
+        # Not in PATH yet, provide clear instructions
+        if [ "$NEEDS_PATH_SETUP" = true ]; then
+            print_colored "$YELLOW" "To use dororong immediately, run:"
+            print_colored "$BLUE" "    export PATH=\"$INSTALL_DIR:\$PATH\" && dororong run"
+            print_colored "$GREEN" ""
+            print_colored "$GREEN" "Or copy-paste this single command:"
+            echo ""
+            echo "export PATH=\"$INSTALL_DIR:\$PATH\" && dororong run"
+            echo ""
+            print_colored "$YELLOW" "(PATH is already configured for new terminal sessions)"
+        else
+            print_colored "$YELLOW" "PATH setup required. Run:"
+            print_colored "$BLUE" "    export PATH=\"$INSTALL_DIR:\$PATH\""
+            print_colored "$BLUE" "    dororong run"
+        fi
     fi
 }
 
