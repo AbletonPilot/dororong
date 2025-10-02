@@ -36,9 +36,6 @@ curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/
 
 # Or using wget
 wget -qO- https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/install.sh | bash
-
-# Uninstall
-curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/uninstall.sh | bash
 ```
 
 #### Homebrew on Linux
@@ -86,6 +83,34 @@ dororong updown      # Up-down animation
 ### Options
 - `--fast` or `-f`: Fast animation
 - Exit: `q`, `Esc`, or `Ctrl+C`
+
+## Uninstallation
+
+### Linux/macOS (Script Install)
+```bash
+# One-liner uninstall
+curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/uninstall.sh | bash
+
+# Or using wget
+wget -qO- https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/uninstall.sh | bash
+```
+
+### Homebrew
+```bash
+brew uninstall dororong
+brew untap abletonpilot/dororong  # Optional: remove tap
+```
+
+### Manual Uninstall
+```bash
+# Linux/macOS - remove binary
+sudo rm /usr/local/bin/dororong
+# or
+rm ~/.local/bin/dororong
+
+# Remove PATH entries from shell config if needed
+# Edit ~/.zshrc, ~/.bashrc, etc. and remove dororong-related lines
+```
 
 ## Building from Source
 
