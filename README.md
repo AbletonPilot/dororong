@@ -2,6 +2,14 @@
 
 Dororong will be dancing for you! A fun terminal animation app.
 
+## Preview
+
+https://github.com/user-attachments/assets/[YOUR-ASSET-ID]/dororong_preview.mp4
+
+> **Note**: To display the video, upload `readme/dororong_preview.mp4` to a GitHub issue/PR comment, then copy the generated URL above.
+> 
+> Alternative: View the video file directly: [dororong_preview.mp4](./readme/dororong_preview.mp4)
+
 ## Quick Installation
 
 ### Download Binary (Recommended)
