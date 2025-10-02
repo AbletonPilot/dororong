@@ -51,11 +51,15 @@ main() {
     
     print_colored "$YELLOW" "Found at: $DORORONG_PATH"
     
-    # Confirmation
-    read -p "Are you sure you want to remove Dororong? (y/N): " -r
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        print_colored "$YELLOW" "Removal cancelled."
-        exit 0
+    # Confirmation (skip if running from pipe or with -y flag)
+    if [ -t 0 ] && [[ "$1" != "-y" ]] && [[ "$1" != "--yes" ]]; then
+        read -p "Are you sure you want to remove Dororong? (y/N): " -r
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_colored "$YELLOW" "Removal cancelled."
+            exit 0
+        fi
+    else
+        print_colored "$BLUE" "Auto-confirming removal (non-interactive mode)"
     fi
     
     # Remove (with sudo if needed)
