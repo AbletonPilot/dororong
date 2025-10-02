@@ -40,7 +40,7 @@ find_dororong() {
 }
 
 main() {
-    print_colored "$BLUE" "🗑️  Starting Dororong removal..."
+    print_colored "$BLUE" "Starting Dororong removal..."
     
     DORORONG_PATH=$(find_dororong)
     
@@ -58,14 +58,45 @@ main() {
         exit 0
     fi
     
-    # Remove
-    if rm "$DORORONG_PATH"; then
-        print_colored "$GREEN" "✅ Dororong has been successfully removed."
+    # Remove (with sudo if needed)
+    if rm "$DORORONG_PATH" 2>/dev/null; then
+        print_colored "$GREEN" "Dororong has been successfully removed."
+    elif command -v sudo >/dev/null 2>&1 && sudo rm "$DORORONG_PATH" 2>/dev/null; then
+        print_colored "$GREEN" "Dororong has been successfully removed."
     else
-        print_colored "$RED" "Error occurred during removal. You may need sudo permissions."
-        print_colored "$YELLOW" "Remove manually: sudo rm $DORORONG_PATH"
+        print_colored "$RED" "Error occurred during removal."
+        print_colored "$YELLOW" "Try manually: sudo rm $DORORONG_PATH"
         exit 1
     fi
+    
+    # Remove PATH entries from shell configs
+    print_colored "$BLUE" "Checking shell configuration files..."
+    local shell_configs=(
+        "$HOME/.zshrc"
+        "$HOME/.bashrc"
+        "$HOME/.bash_profile"
+        "$HOME/.profile"
+    )
+    
+    local cleaned=false
+    for config in "${shell_configs[@]}"; do
+        if [ -f "$config" ] && grep -q "Added by Dororong installer" "$config" 2>/dev/null; then
+            # Remove Dororong PATH entries
+            sed -i.bak '/# Added by Dororong installer/d' "$config"
+            sed -i.bak '/\.local\/bin.*dororong/d' "$config"
+            sed -i.bak '/export PATH.*\.local\/bin/d' "$config"
+            rm -f "$config.bak"
+            print_colored "$GREEN" "Cleaned PATH from $config"
+            cleaned=true
+        fi
+    done
+    
+    if [ "$cleaned" = false ]; then
+        print_colored "$YELLOW" "No PATH entries found in shell configs"
+    fi
+    
+    print_colored "$GREEN" ""
+    print_colored "$GREEN" "Uninstallation complete!"
 }
 
 main "$@"
