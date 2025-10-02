@@ -16,22 +16,22 @@ curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/
 
 ### macOS
 
+#### Homebrew (Recommended)
+```bash
+brew tap abletonpilot/dororong
+brew install dororong
+```
+
 #### Manual Installation
 Download from [Releases page](https://github.com/AbletonPilot/dororong/releases):
 - `dororong-v*-x86_64-apple-darwin.tar.gz` (Intel Mac)
 - `dororong-v*-aarch64-apple-darwin.tar.gz` (Apple Silicon/ARM)
 
-#### Homebrew (Coming Soon)
-```bash
-# Will be available after Homebrew Core approval
-brew install dororong
-```
-
 ### Linux
 
 #### One-liner Install Script (Recommended)
 ```bash
-# Install
+# Install (auto-configures PATH and uses sudo when needed)
 curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/install.sh | bash
 
 # Or using wget
@@ -39,6 +39,12 @@ wget -qO- https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/i
 
 # Uninstall
 curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/uninstall.sh | bash
+```
+
+#### Homebrew on Linux
+```bash
+brew tap abletonpilot/dororong
+brew install dororong
 ```
 ### Windows
 
@@ -123,6 +129,20 @@ source ~/.bashrc
 
 ### Windows Defender Warning
 Some antivirus software may report false positives. This is common with Rust-compiled binaries. Mark as safe or add to exceptions.
+
+## For Homebrew Tap Maintainers
+
+This project includes a Homebrew formula in the `Formula/` directory. To set up your own tap:
+
+```bash
+# 1. Create a tap repository named 'homebrew-dororong'
+# 2. Copy Formula/dororong.rb to your tap repository
+# 3. Users can install with:
+brew tap abletonpilot/dororong
+brew install dororong
+```
+
+The formula builds from source using Cargo, ensuring compatibility across all platforms.
 
 ## Support & Contributing
 
