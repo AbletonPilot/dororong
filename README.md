@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/368feb4a-2b06-495e-9f33-d9eace37d488
 ### Download Binary (Recommended)
 Download the latest release for your platform from [GitHub Releases](https://github.com/AbletonPilot/dororong/releases)
 
-### Linux (One-liner)
+### Linux or macOS (One-liner)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/install.sh | bash
 ```
