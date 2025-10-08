@@ -22,7 +22,7 @@ curl -fsSL https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/
 
 #### Homebrew (Recommended)
 ```bash
-brew tap abletonpilot/dororong
+brew tap AbletonPilot/dororong
 brew install dororong
 ```
 
@@ -44,7 +44,7 @@ wget -qO- https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/i
 
 #### Homebrew on Linux
 ```bash
-brew tap abletonpilot/dororong
+brew tap AbletonPilot/dororong
 brew install dororong
 ```
 ### Windows
@@ -102,7 +102,7 @@ wget -qO- https://raw.githubusercontent.com/AbletonPilot/dororong/main/install/u
 ### Homebrew
 ```bash
 brew uninstall dororong
-brew untap abletonpilot/dororong  # Optional: remove tap
+brew untap AbletonPilot/dororong  # Optional: remove tap
 ```
 
 ### Manual Uninstall
@@ -167,7 +167,7 @@ This project includes a Homebrew formula in the `Formula/` directory. To set up 
 # 1. Create a tap repository named 'homebrew-dororong'
 # 2. Copy Formula/dororong.rb to your tap repository
 # 3. Users can install with:
-brew tap abletonpilot/dororong
+brew tap AbletonPilot/dororong
 brew install dororong
 ```
 
